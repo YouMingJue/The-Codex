@@ -1,5 +1,6 @@
 using UnityEngine;
-using UnityEditor; // Required to use Editor functionality
+using UnityEditor;
+using System.Collections.Generic; // Required to use Editor functionality
 
 [ExecuteInEditMode] // This attribute allows the script to run in the editor
 public class TileManager : MonoBehaviour
@@ -8,8 +9,21 @@ public class TileManager : MonoBehaviour
     public int width = 10;
     public int height = 10;
     public Vector2Int playerStartPosition;
+    public static TileManager instance { get; private set; }
 
     private Tile[,] tiles;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -27,10 +41,16 @@ public class TileManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                Vector3 position = new Vector3(x, y, 0);
                 GameObject tile = PrefabUtility.InstantiatePrefab(tilePrefab, transform) as GameObject;
-                tile.transform.position = position;
-                tiles[x, y] = tile.GetComponent<Tile>();
+                if(tile.TryGetComponent<Tile>(out Tile tileEntity))
+                {
+                    tileEntity.Init();
+                    Vector3 position = new Vector3(x * tileEntity.size.x, y * tileEntity.size.y, 0);
+                    tileEntity.position = new Vector2(x, y);
+                    Debug.Log(tileEntity.size);
+                    tiles[x, y] = tileEntity;
+                    tile.transform.position = position;
+                }
 
                 // Mark the tile as part of the scene for saving
                 Undo.RegisterCreatedObjectUndo(tile, "Create Tile");
@@ -55,5 +75,15 @@ public class TileManager : MonoBehaviour
     public Vector3 GetPlayerStartPosition()
     {
         return new Vector3(playerStartPosition.x, playerStartPosition.y, 0);
+    }
+
+    public List<Tile> GetSurroundingTiles(Vector2Int positon)
+    {
+        List<Tile> neighboringTiles = new List<Tile> ();
+        neighboringTiles.Add(tiles[positon.x - 1, positon.y]);
+        neighboringTiles.Add(tiles[positon.x + 1, positon.y]);
+        neighboringTiles.Add(tiles[positon.x, positon.y + 1]);
+        neighboringTiles.Add(tiles[positon.x, positon.y - 1]);
+        return neighboringTiles;
     }
 }
