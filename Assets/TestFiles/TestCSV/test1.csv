@@ -1,0 +1,4 @@
+Names,HP,MP,Attack,Defense
+player,100,100,50,30
+monster A,500,20,80,40
+monster B,800,10,10,100
