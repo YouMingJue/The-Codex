@@ -31,7 +31,6 @@ public class TileManager : MonoBehaviour
                 GameObject tile = PrefabUtility.InstantiatePrefab(tilePrefab, transform) as GameObject;
                 tile.transform.position = position;
                 tiles[x, y] = tile.GetComponent<Tile>();
-
                 // Mark the tile as part of the scene for saving
                 Undo.RegisterCreatedObjectUndo(tile, "Create Tile");
             }
