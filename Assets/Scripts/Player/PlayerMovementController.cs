@@ -13,6 +13,7 @@ public class PlayerMovementController : NetworkBehaviour
     private void Start()
     {
         PlayerModel.SetActive(false);
+        tileManager = FindFirstObjectByType<TileManager>();
     }
 
     private void Update()
@@ -35,16 +36,17 @@ public class PlayerMovementController : NetworkBehaviour
     public void SetPosition()
     {
         // 从TileManager获取玩家生成位置
+        tileManager = FindFirstObjectByType<TileManager>();
         Vector3 position = tileManager.GetPlayerStartPosition();
-        transform.position = new Vector3(position.x, 0.8f, position.y);
+        transform.position = new Vector3(position.x, position.y, 0f);
     }
 
     public void Movement()
     {
         float xDirection = Input.GetAxis("Horizontal");
-        float zDirection = Input.GetAxis("Vertical");
+        float yDirection = Input.GetAxis("Vertical");
 
-        Vector3 moveDirection = new Vector3(xDirection, 0.0f, zDirection);
+        Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
         // 确保移动在2D平面上
         transform.position += moveDirection * Speed * Time.deltaTime;

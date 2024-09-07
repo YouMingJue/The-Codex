@@ -16,7 +16,8 @@ public class TileManager : MonoBehaviour
 
     public Vector3 GetPlayerStartPosition()
     {
-        return new Vector3(playerStartPosition.x, 0.8f, playerStartPosition.y);
+        // 确保玩家的起始位置在2D平面上
+        return new Vector3(playerStartPosition.x, playerStartPosition.y, 0);
     }
 
     void GenerateGrid()
@@ -26,7 +27,8 @@ public class TileManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                Vector3 position = new Vector3(x, 0.8f, y);
+                // 在2D游戏中，通常Z轴坐标为0
+                Vector3 position = new Vector3(x, y, 0);
                 GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity, transform);
                 tiles[x, y] = tile.GetComponent<Tile>();
             }
