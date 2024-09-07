@@ -1,19 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
 using UnityEngine.SceneManagement;
 
 public class PlayerMovementControllerTest : MonoBehaviour
 {
-    public float Speed = 5.0f; // Move speed
-    public GameObject PlayerModel;
-    public TileManager tileManager; // Reference to TileManager
+    public float Speed = 5.0f; // Movement speed
+    public GameObject PlayerModel; // The model of the player
+    public TileManager tileManager; // Reference to the TileManager
+
+    [SerializeField]private PlayerRotationController rotationController;
 
     private void Start()
     {
-        PlayerModel.SetActive(false);
-        tileManager = FindFirstObjectByType<TileManager>();
+        PlayerModel.SetActive(false); // Disable player model at the start
+        tileManager = FindObjectOfType<TileManager>(); // Find TileManager
     }
 
     private void Update()
@@ -23,37 +24,29 @@ public class PlayerMovementControllerTest : MonoBehaviour
             if (!PlayerModel.activeSelf)
             {
                 SetPosition();
-                PlayerModel.SetActive(true);
+                PlayerModel.SetActive(true); // Activate player model once positioned
             }
 
-            Movement();
+            HandleGlobalMovement();
+            rotationController.HandleMouseRotation(); // Use the rotation controller
         }
     }
 
     public void SetPosition()
     {
-        // Get the player's starting position from the TileManager
-        tileManager = FindFirstObjectByType<TileManager>();
+        // Set player position from TileManager
+        tileManager = FindObjectOfType<TileManager>();
         Vector3 position = tileManager.GetPlayerStartPosition();
         transform.position = new Vector3(position.x, position.y, 0f);
     }
 
-    public void Movement()
+    public void HandleGlobalMovement()
     {
         float xDirection = Input.GetAxis("Horizontal");
         float yDirection = Input.GetAxis("Vertical");
 
+        // Move player globally (not based on local rotation)
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
-
-        // Move the player in 2D space
         transform.position += moveDirection * Speed * Time.deltaTime;
-
-        // If there's movement, rotate the player to face the input direction
-        if (moveDirection != Vector3.zero)
-        {
-            // Calculate the angle in radians, convert to degrees, and apply the rotation
-            float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(0, 0, angle);
-        }
     }
 }
