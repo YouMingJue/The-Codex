@@ -5,10 +5,10 @@ using Mirror;
 using UnityEngine.SceneManagement;
 
 public class PlayerMovementControllerTest : MonoBehaviour
-{ 
-    public float Speed = 5.0f; // 增加速度以便更容易看到效果
+{
+    public float Speed = 5.0f; // Move speed
     public GameObject PlayerModel;
-    public TileManager tileManager; // 引用TileManager
+    public TileManager tileManager; // Reference to TileManager
 
     private void Start()
     {
@@ -26,16 +26,13 @@ public class PlayerMovementControllerTest : MonoBehaviour
                 PlayerModel.SetActive(true);
             }
 
-            //if (hasAuthority)
-            {
-                Movement();
-            }
+            Movement();
         }
     }
 
     public void SetPosition()
     {
-        // 从TileManager获取玩家生成位置
+        // Get the player's starting position from the TileManager
         tileManager = FindFirstObjectByType<TileManager>();
         Vector3 position = tileManager.GetPlayerStartPosition();
         transform.position = new Vector3(position.x, position.y, 0f);
@@ -48,7 +45,15 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
-        // 确保移动在2D平面上
+        // Move the player in 2D space
         transform.position += moveDirection * Speed * Time.deltaTime;
+
+        // If there's movement, rotate the player to face the input direction
+        if (moveDirection != Vector3.zero)
+        {
+            // Calculate the angle in radians, convert to degrees, and apply the rotation
+            float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
     }
 }
