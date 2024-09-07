@@ -1,10 +1,14 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI; // Import UI namespace for Slider
 
 public class HealthSystem : MonoBehaviour
 {
     public int maxHealth = 100;
     private int currentHealth;
+
+    // Reference to the UI Slider for health
+    public Slider healthSlider;
 
     // Event for when the player dies
     public event Action OnPlayerDeath;
@@ -13,6 +17,13 @@ public class HealthSystem : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
+
+        // Initialize the slider to full health
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
     }
 
     // Method to handle when the player takes damage
@@ -20,6 +31,12 @@ public class HealthSystem : MonoBehaviour
     {
         currentHealth -= damage;
         Debug.Log("Player took damage. Current health: " + currentHealth);
+
+        // Update slider value
+        if (healthSlider != null)
+        {
+            healthSlider.value = (float)currentHealth;
+        }
 
         // If health drops to zero, player dies
         if (currentHealth <= 0)
@@ -41,5 +58,11 @@ public class HealthSystem : MonoBehaviour
         currentHealth += amount;
         if (currentHealth > maxHealth) currentHealth = maxHealth;
         Debug.Log("Player healed. Current health: " + currentHealth);
+
+        // Update slider value
+        if (healthSlider != null)
+        {
+            healthSlider.value = (float)currentHealth;
+        }
     }
 }

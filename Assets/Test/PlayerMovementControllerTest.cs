@@ -9,6 +9,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
     public GameObject PlayerModel; // The model of the player
     public TileManager tileManager; // Reference to the TileManager
 
+    [SerializeField]private PlayerRotationController rotationController;
+
     private void Start()
     {
         PlayerModel.SetActive(false); // Disable player model at the start
@@ -26,7 +28,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
             }
 
             HandleGlobalMovement();
-            HandleMouseRotation();
+            rotationController.HandleMouseRotation(); // Use the rotation controller
         }
     }
 
@@ -47,26 +49,4 @@ public class PlayerMovementControllerTest : MonoBehaviour
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
         transform.position += moveDirection * Speed * Time.deltaTime;
     }
-
-    public void HandleMouseRotation()
-    {
-        // Get the mouse position in world coordinates
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        // Calculate the direction from the object to the mouse position
-        Vector3 direction = mousePosition - transform.position;
-
-        // Make sure the object only rotates in the Z axis (2D)
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-        // Apply the rotation to the object
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
-    }
-
-
-
-
-
-
-
 }

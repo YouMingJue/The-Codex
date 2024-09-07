@@ -20,10 +20,16 @@ public class PlayerAbility : MonoBehaviour
     void Update()
     {
         // Check for left mouse click
-        if (Input.GetMouseButtonDown(0)) // 0 means left click
+        if (Input.GetMouseButtonDown(0)) 
         {
             // Trigger the NormalAttack animation
             animator.SetTrigger("NormalAttack");
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+
+            animator.SetTrigger("ElementAttack");
         }
     }
 }
