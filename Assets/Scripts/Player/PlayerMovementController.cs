@@ -6,8 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovementController : NetworkBehaviour
 {
-    public float Speed = 0.1f;
+    public float Speed = 5.0f; // 增加速度以便更容易看到效果
     public GameObject PlayerModel;
+    public TileManager tileManager; // 引用TileManager
 
     private void Start()
     {
@@ -16,9 +17,9 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void Update()
     {
-        if(SceneManager.GetActiveScene().name == "Game")
+        if (SceneManager.GetActiveScene().name == "Game")
         {
-            if(PlayerModel.activeSelf == false)
+            if (!PlayerModel.activeSelf)
             {
                 SetPosition();
                 PlayerModel.SetActive(true);
@@ -27,13 +28,15 @@ public class PlayerMovementController : NetworkBehaviour
             if (hasAuthority)
             {
                 Movement();
-            }        
+            }
         }
     }
 
     public void SetPosition()
     {
-        transform.position = new Vector3(Random.Range(-5,5), 0.8f, Random.Range(-15,7));
+        // 从TileManager获取玩家生成位置
+        Vector3 position = tileManager.GetPlayerStartPosition();
+        transform.position = new Vector3(position.x, 0.8f, position.y);
     }
 
     public void Movement()
@@ -43,6 +46,7 @@ public class PlayerMovementController : NetworkBehaviour
 
         Vector3 moveDirection = new Vector3(xDirection, 0.0f, zDirection);
 
-        transform.position += moveDirection * Speed;
+        // 确保移动在2D平面上
+        transform.position += moveDirection * Speed * Time.deltaTime;
     }
 }
