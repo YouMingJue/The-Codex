@@ -44,9 +44,11 @@ public class PlayerAbility : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Debug.Log("move");
         // Check for left mouse click
         if (Input.GetMouseButtonDown(0)) 
         {
+            Debug.Log("move");
             // Trigger the NormalAttack animation
             animator.SetTrigger("NormalAttack");
         }
