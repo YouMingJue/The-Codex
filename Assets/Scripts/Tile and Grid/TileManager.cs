@@ -11,7 +11,7 @@ public class TileManager : MonoBehaviour
     public Vector2Int playerStartPosition;
     public static TileManager instance { get; private set; }
 
-    private Tile[,] tiles;
+    [SerializeField] private Tile[,] tiles;
 
     private void Awake()
     {
@@ -23,11 +23,7 @@ public class TileManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
-
-    void Start()
-    {
-        // Optionally you can remove runtime grid generation
+        GenerateGrid();
     }
 
     [ContextMenu("Generate Grid")] // Adds this function to the right-click menu in the inspector
@@ -46,19 +42,17 @@ public class TileManager : MonoBehaviour
                 {
                     tileEntity.Init();
                     Vector3 position = new Vector3(x * tileEntity.size.x, y * tileEntity.size.y, 0);
-                    tileEntity.position = new Vector2(x, y);
-                    Debug.Log(tileEntity.size);
+                    tileEntity.position = new Vector2Int(x, y);
                     tiles[x, y] = tileEntity;
                     tile.transform.position = position;
                 }
 
                 // Mark the tile as part of the scene for saving
-                Undo.RegisterCreatedObjectUndo(tile, "Create Tile");
+                //Undo.RegisterCreatedObjectUndo(tile, "Create Tile");
             }
         }
-
         // Mark the scene as dirty to ensure changes are saved
-        EditorUtility.SetDirty(gameObject);
+        //EditorUtility.SetDirty(gameObject);
     }
 
     // Clear the grid in the editor
@@ -79,11 +73,37 @@ public class TileManager : MonoBehaviour
 
     public List<Tile> GetSurroundingTiles(Vector2Int positon)
     {
-        List<Tile> neighboringTiles = new List<Tile> ();
-        neighboringTiles.Add(tiles[positon.x - 1, positon.y]);
-        neighboringTiles.Add(tiles[positon.x + 1, positon.y]);
-        neighboringTiles.Add(tiles[positon.x, positon.y + 1]);
-        neighboringTiles.Add(tiles[positon.x, positon.y - 1]);
+        List<Tile> neighboringTiles = new List<Tile>();
+        // Check each neighboring tile and only add it if it's within the grid bounds
+        if (positon.x > 0) // Check left
+        {
+            neighboringTiles.Add(tiles[positon.x - 1, positon.y]);
+        }
+
+        if (positon.x < width - 1) // Check right
+        {
+            neighboringTiles.Add(tiles[positon.x + 1, positon.y]);
+        }
+
+        if (positon.y < height - 1) // Check up
+        {
+            neighboringTiles.Add(tiles[positon.x, positon.y + 1]);
+        }
+
+        if (positon.y > 0) // Check down
+        {
+            neighboringTiles.Add(tiles[positon.x, positon.y - 1]);
+        }
         return neighboringTiles;
+    }
+
+    private void OnApplicationQuit()
+    {
+        ClearGrid();
+    }
+
+    private void OnDisable()
+    {
+        ClearGrid();
     }
 }

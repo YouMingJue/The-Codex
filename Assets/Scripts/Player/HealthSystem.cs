@@ -5,13 +5,16 @@ using UnityEngine.UI; // Import UI namespace for Slider
 public class HealthSystem : MonoBehaviour
 {
     public int maxHealth = 100;
-    private int currentHealth;
+    public float currentHealth;
+
+    public bool isImmune = false;
 
     // Reference to the UI Slider for health
     public Slider healthSlider;
 
     // Event for when the player dies
     public event Action OnPlayerDeath;
+    public event Action<float, Transform> OnDamage;
 
     // Start is called before the first frame update
     void Start()
@@ -27,10 +30,13 @@ public class HealthSystem : MonoBehaviour
     }
 
     // Method to handle when the player takes damage
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage, Transform attacker)
     {
+        if (isImmune) return;
         currentHealth -= damage;
         Debug.Log("Player took damage. Current health: " + currentHealth);
+
+        OnDamage?.Invoke(damage, attacker);
 
         // Update slider value
         if (healthSlider != null)

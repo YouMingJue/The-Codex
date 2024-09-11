@@ -4,16 +4,28 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.SceneManagement;
 
+
+public enum BuffState
+{
+    None,
+    FireState,
+    WaterState
+}
 public class PlayerMovementController : NetworkBehaviour
 {
     public float Speed = 5.0f; // 增加速度以便更容易看到效果
     public GameObject PlayerModel;
     public TileManager tileManager; // 引用TileManager
+    private BuffState currentState = BuffState.None;
+    [SerializeField] private Collider2D myCollid;
+    [SerializeField] private float buffCost;
+    private PlayerAbility playerAbility;
 
     private void Start()
     {
         PlayerModel.SetActive(false);
         tileManager = FindFirstObjectByType<TileManager>();
+        playerAbility = GetComponent<PlayerAbility>();
     }
 
     private void Update()
@@ -26,9 +38,23 @@ public class PlayerMovementController : NetworkBehaviour
                 PlayerModel.SetActive(true);
             }
 
-            if (hasAuthority)
+            if (hasAuthority && currentState != BuffState.WaterState)
             {
-                Movement();
+               transform.position += Movement();
+            }else if(currentState == BuffState.WaterState)
+            {
+                myCollid.enabled = false;
+                
+                if(Physics2D.OverlapPoint(transform.position + Movement()).GetComponent<Tile>().type == TileType.Water && playerAbility.Mana >= buffCost)
+                {
+                    transform.position += Movement();
+                    playerAbility.Mana -= buffCost * 1.2f;
+                }
+                else
+                {
+                    playerAbility.Mana -= buffCost;
+                }
+                if (playerAbility.Mana <= 0 || Input.GetKeyDown(KeyCode.LeftShift)) currentState = BuffState.None;
             }
         }
     }
@@ -41,7 +67,7 @@ public class PlayerMovementController : NetworkBehaviour
         transform.position = new Vector3(position.x, position.y, 0f);
     }
 
-    public void Movement()
+    public Vector3 Movement()
     {
         float xDirection = Input.GetAxis("Horizontal");
         float yDirection = Input.GetAxis("Vertical");
@@ -49,6 +75,28 @@ public class PlayerMovementController : NetworkBehaviour
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
         // 确保移动在2D平面上
-        transform.position += moveDirection * Speed * Time.deltaTime;
+        return moveDirection * Speed * Time.deltaTime;
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.TryGetComponent<Tile>(out Tile tile))
+        {
+            if (tile != null)
+            {
+                switch (tile.type)
+                {
+                    case TileType.Fire:
+                        break;
+                    case TileType.Water:
+                        if (playerAbility.element != TileType.Water) return;
+                        if (Input.GetKeyDown(KeyCode.LeftShift) && playerAbility.Mana >= buffCost)
+                        {
+                            currentState = BuffState.WaterState;
+                        }
+                        break;
+                }
+            }
+        }
     }
 }
