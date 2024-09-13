@@ -113,6 +113,11 @@ public  class Tile : MonoBehaviour
         ChangeColor();
         restoreCD = 5;
         convertCD = 3;
+
+        if (convertType == TileType.Fire)
+        {
+            GenerateFireEffect();
+        }
     }
 
     private void ChangeColor()
@@ -139,6 +144,20 @@ public  class Tile : MonoBehaviour
                 break;
         }
     }
+
+private void GenerateFireEffect()
+{
+    string path = "Fire FX";
+        GameObject fireEffectPrefab = Resources.Load<GameObject>(path);
+    if (fireEffectPrefab != null)
+    {
+        GameObject fireEffect = Instantiate(fireEffectPrefab, new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z), Quaternion.identity);
+    }
+    else
+    {
+        Debug.LogError("Fire effect prefab not found!");
+    }
+}
 
     private IEnumerator RestoreElement()
     {
