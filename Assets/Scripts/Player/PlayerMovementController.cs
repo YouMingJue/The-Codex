@@ -23,15 +23,13 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void Start()
     {
-        PlayerModel.SetActive(false);
+        //PlayerModel.SetActive(false);
         tileManager = FindFirstObjectByType<TileManager>();
         playerAbility = GetComponent<PlayerAbility>();
     }
 
     private void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Game")
-        {
             if (!PlayerModel.activeSelf)
             {
                 SetPosition();
@@ -56,7 +54,6 @@ public class PlayerMovementController : NetworkBehaviour
                 }
                 if (playerAbility.Mana <= 0 || Input.GetKeyDown(KeyCode.LeftShift)) currentState = BuffState.None;
             }
-        }
     }
 
     public void SetPosition()

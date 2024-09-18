@@ -25,16 +25,15 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     private void Start()
     {
-        PlayerModel.SetActive(false); // Disable player model at the start
+        //PlayerModel.SetActive(false); // Disable player model at the start
         tileManager = FindObjectOfType<TileManager>(); // Find TileManager
         playerAbility = GetComponent<PlayerAbility>();
         health = GetComponent<HealthSystem>();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (SceneManager.GetActiveScene().name == "Game")
-        {
+      
             if (!PlayerModel.activeSelf)
             {
                 SetPosition();
@@ -73,7 +72,6 @@ public class PlayerMovementControllerTest : MonoBehaviour
                 }
             }
             rotationController.HandleMouseRotation(); // Use the rotation controller
-        }
     }
 
     public void SetPosition()
@@ -92,7 +90,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
         // 确保移动在2D平面上
-        return moveDirection * Speed * Time.deltaTime;
+        return moveDirection.normalized * Speed * Time.deltaTime;
     }
 
     private void CheckForWaterTiles()
