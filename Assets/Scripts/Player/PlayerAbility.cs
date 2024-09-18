@@ -5,6 +5,7 @@ using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using UnityEngine.EventSystems;
 
 public class PlayerAbility : MonoBehaviour
 {
@@ -46,14 +47,14 @@ public class PlayerAbility : MonoBehaviour
     {
         Debug.Log("move");
         // Check for left mouse click
-        if (Input.GetMouseButtonDown(0)) 
+        if (Input.GetMouseButtonDown(0) && !IsMouseOverUI()) 
         {
             Debug.Log("move");
             // Trigger the NormalAttack animation
             animator.SetTrigger("NormalAttack");
         }
 
-        if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount)
+        if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI())
         {
 
             animator.SetTrigger("ElementAttack");
@@ -115,4 +116,8 @@ public class PlayerAbility : MonoBehaviour
             entity.TakeDamage(damage, transform);
         }
     }
+
+    private bool IsMouseOverUI(){
+        return EventSystem.current.IsPointerOverGameObject();
+    }//To detect if the cursor is over UI, don't attack
 }
