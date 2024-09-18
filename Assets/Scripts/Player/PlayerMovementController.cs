@@ -69,7 +69,7 @@ public class PlayerMovementController : NetworkBehaviour
         float xDirection = Input.GetAxis("Horizontal");
         float yDirection = Input.GetAxis("Vertical");
 
-        Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
+        Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f).normalized;
 
         // 确保移动在2D平面上
         return moveDirection * Speed * Time.deltaTime;
