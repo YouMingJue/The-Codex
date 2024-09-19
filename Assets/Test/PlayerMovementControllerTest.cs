@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class PlayerMovementControllerTest : MonoBehaviour
 {
     public float Speed = 5.0f; // Movement speed
-    public GameObject PlayerModel; // The model of the player
+    public GameObject PlayerModel; // The mo78del of the player
     public TileManager tileManager; // Reference to the TileManager
 
     public float checkRadius = 1.0f; // Radius for detecting water tiles around the player
@@ -84,8 +84,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     public Vector3 Movement()
     {
-        float xDirection = Input.GetAxis("Horizontal");
-        float yDirection = Input.GetAxis("Vertical");
+        float xDirection = Input.GetAxisRaw("Horizontal");
+        float yDirection = Input.GetAxisRaw("Vertical");
 
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 

@@ -907,6 +907,13 @@ MonoBehaviour:
   Speed: 5
   PlayerModel: {fileID: 5637356563684244379}
   tileManager: {fileID: 0}
+  checkRadius: 1
+  tileLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  myCollid: {fileID: 0}
+  buffCost: 0
+  myRenderer: {fileID: 0}
   rotationController: {fileID: 7087618385490577813}
 --- !u!95 &8891326653193874498
 Animator:
@@ -1698,8 +1705,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -213601331
+  m_SortingLayer: 1
   m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 4b66f21097323d44ab40669b2fb9c53d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
