@@ -5,6 +5,7 @@ using Mirror;
 using Steamworks;
 using UnityEngine.UI;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class LobbyController : MonoBehaviour
 {
@@ -262,5 +263,32 @@ public class LobbyController : MonoBehaviour
         LocalplayerController.CanStartGame(SceneName);
     }
 
+    public void InviteFriendsToLobby()
+    {
+        if (CurrentLobbyID != 0)
+        {
+            CSteamID lobbyID = new CSteamID(CurrentLobbyID);
 
+            Debug.Log("Inviting...");
+            SteamFriends.ActivateGameOverlayInviteDialog(lobbyID);
+        }
+        else
+        {
+            Debug.LogError("Lobby ID is not set.");
+        }
+    }
+
+    public void GoToMainMenu()
+    {
+        if (NetworkClient.active)
+        {
+            NetworkClient.Shutdown();
+        }
+        if (NetworkServer.active)
+        {
+            NetworkServer.Shutdown();
+        }
+
+        SceneManager.LoadScene("MainMenu");
+    }
 }
