@@ -12,6 +12,7 @@ public class LobbyController : MonoBehaviour
 
     //UI Elements
     public Text LobbyNameText;
+    public Text CountdownText;
 
     //Player Data
     public GameObject PlayerListViewContent;
@@ -27,6 +28,10 @@ public class LobbyController : MonoBehaviour
     //Ready
     public Button StartGameButton;
     public Text ReadyButtonText;
+    public string GameScene;
+    public float countdownDuration = 5.0f;
+    private float countdownTimer;
+    private bool IsCountingDown = false;
 
 
 
@@ -49,6 +54,38 @@ public class LobbyController : MonoBehaviour
     {
         if(Instance == null) { Instance = this; }
     }
+    private void Start()
+    {
+        FindLocalPlayer();
+    }
+
+  
+
+    private void Update()
+    {
+        if (IsCountingDown)
+        {
+            countdownTimer -= Time.deltaTime; 
+            UpdateCountdownText(); 
+
+            if (countdownTimer <= 0f)
+            {
+                IsCountingDown = false; 
+                StartGame(GameScene);
+            }
+        }
+    }
+
+    public void UpdateCountdownText()
+    {
+        if (countdownTimer < 0)
+        {
+            return;
+        }
+        int seconds = (int)countdownTimer;
+        string timeLeft = seconds.ToString();
+        CountdownText.text = "Start in " + timeLeft + " seconds";
+    }
 
     public void ReadyPlayer()
     {
@@ -70,37 +107,34 @@ public class LobbyController : MonoBehaviour
 
     public void CheckIfAllReady()
     {
-        bool AllReady = false;
-
-        foreach(PlayerObjectController player in Manager.GamePlayers)
+        if (LocalplayerController == null)
         {
-            if (player.Ready)
-            {
-                AllReady = true;
-            }
-            else
-            {
-                AllReady = false;
-                break;
-            }
+            Debug.LogError("LocalplayerController is not initialized.");
+            return;
         }
 
-        if (AllReady)
+        bool allReady = Manager.GamePlayers.All(player => player.Ready);
+
+        if (allReady)
         {
-            if(LocalplayerController.PlayerIdNumber == 1)
+            if (LocalplayerController.PlayerIdNumber == 1)
             {
-                StartGameButton.interactable = true;
-            }
-            else
-            {
-                StartGameButton.interactable = false;
+                StartGameButton.interactable = false; 
+                if (countdownTimer <= 0f && !IsCountingDown) 
+                {
+                    countdownTimer = countdownDuration;
+                    IsCountingDown = true;
+                    CountdownText.gameObject.SetActive(true);
+                }
             }
         }
         else
         {
-            StartGameButton.interactable = false;
+            StartGameButton.interactable = false; 
+            IsCountingDown = false; 
+            countdownTimer = 0f;
+            CountdownText.gameObject.SetActive(false);
         }
-
     }
 
 
@@ -121,7 +155,14 @@ public class LobbyController : MonoBehaviour
     public void FindLocalPlayer()
     {
         LocalPlayerObject = GameObject.Find("LocalGamePlayer");
-        LocalplayerController = LocalPlayerObject.GetComponent<PlayerObjectController>();
+        if (LocalPlayerObject != null)
+        {
+            LocalplayerController = LocalPlayerObject.GetComponent<PlayerObjectController>();
+        }
+        else
+        {
+            Debug.LogError("Local player object not found.");
+        }
     }
 
 
