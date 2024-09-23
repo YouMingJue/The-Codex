@@ -7,3 +7,9 @@ public enum TileType
     Metal,
     Earth
 }
+
+public enum Team
+{
+    TeamA,
+    TeamB
+}

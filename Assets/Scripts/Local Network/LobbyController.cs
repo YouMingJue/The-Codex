@@ -4,28 +4,36 @@ using UnityEngine;
 using Mirror;
 using Steamworks;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Linq;
 
 public class LobbyController : MonoBehaviour
 {
     public static LobbyController Instance;
 
-    //UI Elements
+    // UI Elements
     public Text LobbyNameText;
     public Text CountdownText;
 
-    //Player Data
-    public GameObject PlayerListViewContent;
-    public GameObject PlayerListItemPrefab;
+    // Player Data
+    public GameObject teamAPlayerListViewContent;
+    public GameObject teamBPlayerListViewContent;
+    public GameObject playerListItemPrefab;
     public GameObject LocalPlayerObject;
 
-    //Other Data
+    private Dictionary<Team, List<PlayerObjectController>> teamPlayers = new Dictionary<Team, List<PlayerObjectController>>()
+    {
+        { Team.TeamA, new List<PlayerObjectController>() },
+        { Team.TeamB, new List<PlayerObjectController>() }
+    };
+
+    // Other Data
     public ulong CurrentLobbyID;
     public bool PlayerItemCreated = false;
     private List<PlayerListItem> PlayerListItems = new List<PlayerListItem>();
     public PlayerObjectController LocalplayerController;
 
-    //Ready
+    // Ready
     public Button StartGameButton;
     public Text ReadyButtonText;
     public string GameScene;
@@ -33,9 +41,7 @@ public class LobbyController : MonoBehaviour
     private float countdownTimer;
     private bool IsCountingDown = false;
 
-
-
-    //Manager
+    // Manager
     private CustomNetworkManager manager;
 
     private CustomNetworkManager Manager
@@ -52,25 +58,26 @@ public class LobbyController : MonoBehaviour
 
     private void Awake()
     {
-        if(Instance == null) { Instance = this; }
-    }
-    private void Start()
-    {
-        FindLocalPlayer();
+        if (Instance == null) { Instance = this; }
+        manager = CustomNetworkManager.singleton as CustomNetworkManager;
     }
 
-  
+    private void Start()
+    {
+        AutoAssignTeams();
+        UpdateTeamUI();
+    }
 
     private void Update()
     {
         if (IsCountingDown)
         {
-            countdownTimer -= Time.deltaTime; 
-            UpdateCountdownText(); 
+            countdownTimer -= Time.deltaTime;
+            UpdateCountdownText();
 
             if (countdownTimer <= 0f)
             {
-                IsCountingDown = false; 
+                IsCountingDown = false;
                 StartGame(GameScene);
             }
         }
@@ -90,6 +97,8 @@ public class LobbyController : MonoBehaviour
     public void ReadyPlayer()
     {
         LocalplayerController.ChangeReady();
+        AutoAssignTeams();
+        UpdateTeamUI();
     }
 
     public void UpdateButton()
@@ -103,7 +112,6 @@ public class LobbyController : MonoBehaviour
             ReadyButtonText.text = "Ready";
         }
     }
-
 
     public void CheckIfAllReady()
     {
@@ -119,8 +127,8 @@ public class LobbyController : MonoBehaviour
         {
             if (LocalplayerController.PlayerIdNumber == 1)
             {
-                StartGameButton.interactable = false; 
-                if (countdownTimer <= 0f && !IsCountingDown) 
+                StartGameButton.interactable = false;
+                if (countdownTimer <= 0f && !IsCountingDown)
                 {
                     countdownTimer = countdownDuration;
                     IsCountingDown = true;
@@ -130,13 +138,12 @@ public class LobbyController : MonoBehaviour
         }
         else
         {
-            StartGameButton.interactable = false; 
-            IsCountingDown = false; 
+            StartGameButton.interactable = false;
+            IsCountingDown = false;
             countdownTimer = 0f;
             CountdownText.gameObject.SetActive(false);
         }
     }
-
 
     public void UpdateLobbyName()
     {
@@ -146,10 +153,12 @@ public class LobbyController : MonoBehaviour
 
     public void UpdatePlayerList()
     {
-        if(!PlayerItemCreated) { CreateHostPlayerItem(); } //Host
-        if(PlayerListItems.Count < Manager.GamePlayers.Count) { CreateClientPlayerItem();}
-        if(PlayerListItems.Count > Manager.GamePlayers.Count) { RemovePlayerItem(); }
-        if(PlayerListItems.Count == Manager.GamePlayers.Count) { UpdatePlayerItem(); }
+        if (!PlayerItemCreated) { CreateHostPlayerItem(); }
+        if (PlayerListItems.Count < Manager.GamePlayers.Count) { CreateClientPlayerItem(); }
+        if (PlayerListItems.Count > Manager.GamePlayers.Count) { RemovePlayerItem(); }
+        if (PlayerListItems.Count == Manager.GamePlayers.Count) { UpdatePlayerItem(); }
+        AutoAssignTeams();
+        UpdateTeamUI();
     }
 
     public void FindLocalPlayer()
@@ -165,12 +174,11 @@ public class LobbyController : MonoBehaviour
         }
     }
 
-
     public void CreateHostPlayerItem()
     {
-        foreach(PlayerObjectController player in Manager.GamePlayers)
+        foreach (PlayerObjectController player in Manager.GamePlayers)
         {
-            GameObject NewPlayerItem = Instantiate(PlayerListItemPrefab) as GameObject;
+            GameObject NewPlayerItem = Instantiate(playerListItemPrefab, teamAPlayerListViewContent.transform, false);
             PlayerListItem NewPlayerItemScript = NewPlayerItem.GetComponent<PlayerListItem>();
 
             NewPlayerItemScript.PlayerName = player.PlayerName;
@@ -178,10 +186,6 @@ public class LobbyController : MonoBehaviour
             NewPlayerItemScript.PlayerSteamID = player.PlayerSteamID;
             NewPlayerItemScript.Ready = player.Ready;
             NewPlayerItemScript.SetPlayerValues();
-
-
-            NewPlayerItem.transform.SetParent(PlayerListViewContent.transform);
-            NewPlayerItem.transform.localScale = Vector3.one;
 
             PlayerListItems.Add(NewPlayerItemScript);
         }
@@ -192,9 +196,9 @@ public class LobbyController : MonoBehaviour
     {
         foreach (PlayerObjectController player in Manager.GamePlayers)
         {
-            if(!PlayerListItems.Any(b => b.ConnectionID == player.ConnectionID))
+            if (!PlayerListItems.Any(b => b.ConnectionID == player.ConnectionID))
             {
-                GameObject NewPlayerItem = Instantiate(PlayerListItemPrefab) as GameObject;
+                GameObject NewPlayerItem = Instantiate(playerListItemPrefab, teamAPlayerListViewContent.transform, false);
                 PlayerListItem NewPlayerItemScript = NewPlayerItem.GetComponent<PlayerListItem>();
 
                 NewPlayerItemScript.PlayerName = player.PlayerName;
@@ -202,10 +206,6 @@ public class LobbyController : MonoBehaviour
                 NewPlayerItemScript.PlayerSteamID = player.PlayerSteamID;
                 NewPlayerItemScript.Ready = player.Ready;
                 NewPlayerItemScript.SetPlayerValues();
-
-
-                NewPlayerItem.transform.SetParent(PlayerListViewContent.transform);
-                NewPlayerItem.transform.localScale = Vector3.one;
 
                 PlayerListItems.Add(NewPlayerItemScript);
             }
@@ -216,18 +216,17 @@ public class LobbyController : MonoBehaviour
     {
         foreach (PlayerObjectController player in Manager.GamePlayers)
         {
-            foreach(PlayerListItem PlayerListItemScript in PlayerListItems)
+            foreach (PlayerListItem PlayerListItemScript in PlayerListItems)
             {
-                if(PlayerListItemScript.ConnectionID == player.ConnectionID)
+                if (PlayerListItemScript.ConnectionID == player.ConnectionID)
                 {
                     PlayerListItemScript.PlayerName = player.PlayerName;
                     PlayerListItemScript.Ready = player.Ready;
                     PlayerListItemScript.SetPlayerValues();
-                    if(player == LocalplayerController)
+                    if (player == LocalplayerController)
                     {
                         UpdateButton();
                     }
-
                 }
             }
         }
@@ -240,14 +239,15 @@ public class LobbyController : MonoBehaviour
 
         foreach (PlayerListItem playerlistItem in PlayerListItems)
         {
-            if(!Manager.GamePlayers.Any(b=> b.ConnectionID == playerlistItem.ConnectionID))
+            if (!Manager.GamePlayers.Any(b => b.ConnectionID == playerlistItem.ConnectionID))
             {
                 playerListItemToRemove.Add(playerlistItem);
             }
         }
-        if(playerListItemToRemove.Count > 0)
+
+        if (playerListItemToRemove.Count > 0)
         {
-            foreach(PlayerListItem playerlistItemToRemove in playerListItemToRemove)
+            foreach (PlayerListItem playerlistItemToRemove in playerListItemToRemove)
             {
                 GameObject ObjectToRemove = playerlistItemToRemove.gameObject;
                 PlayerListItems.Remove(playerlistItemToRemove);
@@ -262,5 +262,91 @@ public class LobbyController : MonoBehaviour
         LocalplayerController.CanStartGame(SceneName);
     }
 
+    public void InviteFriendsToLobby()
+    {
+        if (CurrentLobbyID != 0)
+        {
+            CSteamID lobbyID = new CSteamID(CurrentLobbyID);
 
+            Debug.Log("Inviting...");
+            SteamFriends.ActivateGameOverlayInviteDialog(lobbyID);
+        }
+        else
+        {
+            Debug.LogError("Lobby ID is not set.");
+        }
+    }
+
+    public void GoToMainMenu()
+    {
+        if (NetworkClient.active)
+        {
+            NetworkClient.Shutdown();
+        }
+        if (NetworkServer.active)
+        {
+            NetworkServer.Shutdown();
+        }
+
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void AutoAssignTeams()
+    {
+        foreach (PlayerObjectController player in Manager.GamePlayers)
+        {
+            if (!player.Ready)
+            {
+                Team assignedTeam = teamPlayers[Team.TeamA].Count < teamPlayers[Team.TeamB].Count || teamPlayers[Team.TeamA].Count == teamPlayers[Team.TeamB].Count ? Team.TeamA : Team.TeamB;
+                if (teamPlayers[Team.TeamA].Count < 2 || teamPlayers[Team.TeamB].Count < 2)
+                {
+                    player.playerTeam = assignedTeam;
+                    teamPlayers[assignedTeam].Add(player);
+                }
+            }
+        }
+    }
+
+    public void ChangeTeam(PlayerObjectController player, Team newTeam)
+    {
+        if (teamPlayers[player.playerTeam].Remove(player) && teamPlayers[newTeam].Count < 2)
+        {
+            player.playerTeam = newTeam;
+            teamPlayers[newTeam].Add(player);
+            UpdateTeamUI();
+        }
+    }
+
+    public void UpdateTeamUI()
+    {
+        ClearChildren(teamAPlayerListViewContent.transform);
+        ClearChildren(teamBPlayerListViewContent.transform);
+
+        foreach (PlayerObjectController player in teamPlayers[Team.TeamA])
+        {
+            AddPlayerToList(teamAPlayerListViewContent, player);
+        }
+        foreach (PlayerObjectController player in teamPlayers[Team.TeamB])
+        {
+            AddPlayerToList(teamBPlayerListViewContent, player);
+        }
+    }
+
+    private void AddPlayerToList(GameObject listViewContent, PlayerObjectController player)
+    {
+        GameObject newItem= Instantiate(playerListItemPrefab, listViewContent.transform, false);
+Text textComponent = newItem.GetComponent<Text>();
+if (textComponent != null)
+{
+textComponent.text = player.PlayerName;
+}
+}
+
+private void ClearChildren(Transform parent)
+{
+    foreach (Transform child in parent)
+    {
+        Destroy(child.gameObject);
+    }
+}
 }

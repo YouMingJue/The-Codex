@@ -2379,9 +2379,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LobbyNameText: {fileID: 1739661436}
   CountdownText: {fileID: 324304570}
-  PlayerListViewContent: {fileID: 674640678}
-  PlayerListItemPrefab: {fileID: 952814849086218498, guid: 098a6893d5f39a74bb3a06fcebc7786e, type: 3}
-  LocalPlayerObject: {fileID: 0}
+  teamAPlayerListViewContent: {fileID: 674640678}
+  teamBPlayerListViewContent: {fileID: 2094731253}
+  playerListItemPrefab: {fileID: 952814849086218498, guid: 098a6893d5f39a74bb3a06fcebc7786e, type: 3}
+  LocalPlayerObject: {fileID: 6966547381864917919, guid: 33e9ee5f0c659344e93e701bad7d4338, type: 3}
   CurrentLobbyID: 0
   PlayerItemCreated: 0
   LocalplayerController: {fileID: 0}
