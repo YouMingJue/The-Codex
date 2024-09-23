@@ -23,13 +23,15 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void Start()
     {
-        //PlayerModel.SetActive(false);
+        PlayerModel.SetActive(false);
         tileManager = FindFirstObjectByType<TileManager>();
         playerAbility = GetComponent<PlayerAbility>();
     }
 
     private void Update()
     {
+        if (SceneManager.GetActiveScene().name == "Game")
+        {
             if (!PlayerModel.activeSelf)
             {
                 SetPosition();
@@ -54,6 +56,7 @@ public class PlayerMovementController : NetworkBehaviour
                 }
                 if (playerAbility.Mana <= 0 || Input.GetKeyDown(KeyCode.LeftShift)) currentState = BuffState.None;
             }
+        }
     }
 
     public void SetPosition()
@@ -69,7 +72,7 @@ public class PlayerMovementController : NetworkBehaviour
         float xDirection = Input.GetAxis("Horizontal");
         float yDirection = Input.GetAxis("Vertical");
 
-        Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f).normalized;
+        Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
         // 确保移动在2D平面上
         return moveDirection * Speed * Time.deltaTime;

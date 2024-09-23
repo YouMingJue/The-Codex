@@ -5,7 +5,6 @@ using Mirror;
 using Steamworks;
 using UnityEngine.UI;
 using System.Linq;
-using UnityEngine.SceneManagement;
 
 public class LobbyController : MonoBehaviour
 {
@@ -13,7 +12,6 @@ public class LobbyController : MonoBehaviour
 
     //UI Elements
     public Text LobbyNameText;
-    public Text CountdownText;
 
     //Player Data
     public GameObject PlayerListViewContent;
@@ -29,10 +27,6 @@ public class LobbyController : MonoBehaviour
     //Ready
     public Button StartGameButton;
     public Text ReadyButtonText;
-    public string GameScene;
-    public float countdownDuration = 5.0f;
-    private float countdownTimer;
-    private bool IsCountingDown = false;
 
 
 
@@ -55,38 +49,6 @@ public class LobbyController : MonoBehaviour
     {
         if(Instance == null) { Instance = this; }
     }
-    private void Start()
-    {
-        FindLocalPlayer();
-    }
-
-  
-
-    private void Update()
-    {
-        if (IsCountingDown)
-        {
-            countdownTimer -= Time.deltaTime; 
-            UpdateCountdownText(); 
-
-            if (countdownTimer <= 0f)
-            {
-                IsCountingDown = false; 
-                StartGame(GameScene);
-            }
-        }
-    }
-
-    public void UpdateCountdownText()
-    {
-        if (countdownTimer < 0)
-        {
-            return;
-        }
-        int seconds = (int)countdownTimer;
-        string timeLeft = seconds.ToString();
-        CountdownText.text = "Start in " + timeLeft + " seconds";
-    }
 
     public void ReadyPlayer()
     {
@@ -108,34 +70,37 @@ public class LobbyController : MonoBehaviour
 
     public void CheckIfAllReady()
     {
-        if (LocalplayerController == null)
+        bool AllReady = false;
+
+        foreach(PlayerObjectController player in Manager.GamePlayers)
         {
-            Debug.LogError("LocalplayerController is not initialized.");
-            return;
+            if (player.Ready)
+            {
+                AllReady = true;
+            }
+            else
+            {
+                AllReady = false;
+                break;
+            }
         }
 
-        bool allReady = Manager.GamePlayers.All(player => player.Ready);
-
-        if (allReady)
+        if (AllReady)
         {
-            if (LocalplayerController.PlayerIdNumber == 1)
+            if(LocalplayerController.PlayerIdNumber == 1)
             {
-                StartGameButton.interactable = false; 
-                if (countdownTimer <= 0f && !IsCountingDown) 
-                {
-                    countdownTimer = countdownDuration;
-                    IsCountingDown = true;
-                    CountdownText.gameObject.SetActive(true);
-                }
+                StartGameButton.interactable = true;
+            }
+            else
+            {
+                StartGameButton.interactable = false;
             }
         }
         else
         {
-            StartGameButton.interactable = false; 
-            IsCountingDown = false; 
-            countdownTimer = 0f;
-            CountdownText.gameObject.SetActive(false);
+            StartGameButton.interactable = false;
         }
+
     }
 
 
@@ -156,14 +121,7 @@ public class LobbyController : MonoBehaviour
     public void FindLocalPlayer()
     {
         LocalPlayerObject = GameObject.Find("LocalGamePlayer");
-        if (LocalPlayerObject != null)
-        {
-            LocalplayerController = LocalPlayerObject.GetComponent<PlayerObjectController>();
-        }
-        else
-        {
-            Debug.LogError("Local player object not found.");
-        }
+        LocalplayerController = LocalPlayerObject.GetComponent<PlayerObjectController>();
     }
 
 
@@ -263,32 +221,5 @@ public class LobbyController : MonoBehaviour
         LocalplayerController.CanStartGame(SceneName);
     }
 
-    public void InviteFriendsToLobby()
-    {
-        if (CurrentLobbyID != 0)
-        {
-            CSteamID lobbyID = new CSteamID(CurrentLobbyID);
 
-            Debug.Log("Inviting...");
-            SteamFriends.ActivateGameOverlayInviteDialog(lobbyID);
-        }
-        else
-        {
-            Debug.LogError("Lobby ID is not set.");
-        }
-    }
-
-    public void GoToMainMenu()
-    {
-        if (NetworkClient.active)
-        {
-            NetworkClient.Shutdown();
-        }
-        if (NetworkServer.active)
-        {
-            NetworkServer.Shutdown();
-        }
-
-        SceneManager.LoadScene("MainMenu");
-    }
 }

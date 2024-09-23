@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class PlayerMovementControllerTest : MonoBehaviour
 {
     public float Speed = 5.0f; // Movement speed
-    public GameObject PlayerModel; // The mo78del of the player
+    public GameObject PlayerModel; // The model of the player
     public TileManager tileManager; // Reference to the TileManager
 
     public float checkRadius = 1.0f; // Radius for detecting water tiles around the player
@@ -25,15 +25,16 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     private void Start()
     {
-        //PlayerModel.SetActive(false); // Disable player model at the start
+        PlayerModel.SetActive(false); // Disable player model at the start
         tileManager = FindObjectOfType<TileManager>(); // Find TileManager
         playerAbility = GetComponent<PlayerAbility>();
         health = GetComponent<HealthSystem>();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-      
+        if (SceneManager.GetActiveScene().name == "Game")
+        {
             if (!PlayerModel.activeSelf)
             {
                 SetPosition();
@@ -72,6 +73,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
                 }
             }
             rotationController.HandleMouseRotation(); // Use the rotation controller
+        }
     }
 
     public void SetPosition()
@@ -84,13 +86,13 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     public Vector3 Movement()
     {
-        float xDirection = Input.GetAxisRaw("Horizontal");
-        float yDirection = Input.GetAxisRaw("Vertical");
+        float xDirection = Input.GetAxis("Horizontal");
+        float yDirection = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
         // 确保移动在2D平面上
-        return moveDirection.normalized * Speed * Time.deltaTime;
+        return moveDirection * Speed * Time.deltaTime;
     }
 
     private void CheckForWaterTiles()
