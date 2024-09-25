@@ -7,7 +7,7 @@ public class CameraFollower : MonoBehaviour
 
     private Transform target;
 
-    private void Awake()
+    private void Start()
     {
         // ��Awake���ҵ�����"Player"��ǩ�Ķ���
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
