@@ -16,6 +16,8 @@ public class PlayerListItem : MonoBehaviour
     public Text PlayerReadyText;
     public bool Ready;
 
+    public Text playerTeamText;
+    public Team playerTeam;
 
     protected Callback<AvatarImageLoaded_t> ImageLoaded;
 
@@ -47,8 +49,8 @@ public class PlayerListItem : MonoBehaviour
         if (!AvatarReceived) { GetPlayerIcon(); }
 
         transform.localScale = scale;
+        ChangePlayerTeamStatus();
     }
-
 
     void GetPlayerIcon()
     {
@@ -90,4 +92,8 @@ public class PlayerListItem : MonoBehaviour
         }
     }
 
+    public void ChangePlayerTeamStatus()
+    {
+        playerTeamText.text = playerTeam.ToString();
+    }
 }
