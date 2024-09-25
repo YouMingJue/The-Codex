@@ -15,6 +15,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     HealthSystem health; 
 
+    private PlayerObjectController playerObjectController;
+
     [SerializeField] private Collider2D myCollid;
     [SerializeField] private float buffCost;
     [SerializeField] private SpriteRenderer myRenderer;
@@ -29,6 +31,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
         tileManager = FindObjectOfType<TileManager>(); // Find TileManager
         playerAbility = GetComponent<PlayerAbility>();
         health = GetComponent<HealthSystem>();
+
+        playerObjectController = GetComponent<PlayerObjectController>();
     }
 
     private void Update()
@@ -43,6 +47,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
             // Check for water tiles around the player in each frame
             CheckForWaterTiles();
 
+if (playerObjectController.hasAuthority)
+{
             // Handle normal movement when not in WaterState
             if (currentState != BuffState.WaterState)
             {
@@ -74,6 +80,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
             }
             rotationController.HandleMouseRotation(); // Use the rotation controller
         }
+        }
     }
 
     public void SetPosition()
@@ -91,7 +98,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
-        // È·±£ÒÆ¶¯ÔÚ2DÆ½ÃæÉÏ
+        // È·ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½2DÆ½ï¿½ï¿½ï¿½ï¿½
         return moveDirection * Speed * Time.deltaTime;
     }
 
