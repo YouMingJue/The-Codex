@@ -7,13 +7,15 @@ using UnityEngine.SceneManagement;
 public class PlayerMovementControllerTest : MonoBehaviour
 {
     public float Speed = 5.0f; // Movement speed
-    public GameObject PlayerModel; // The mo78del of the player
+    public GameObject PlayerModel; // The model of the player
     public TileManager tileManager; // Reference to the TileManager
 
     public float checkRadius = 1.0f; // Radius for detecting water tiles around the player
     public LayerMask tileLayer; // Layer for tiles (make sure water tiles are on this layer)
 
     HealthSystem health; 
+
+    private PlayerObjectController playerObjectController;
 
     [SerializeField] private Collider2D myCollid;
     [SerializeField] private float buffCost;
@@ -25,15 +27,18 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     private void Start()
     {
-        //PlayerModel.SetActive(false); // Disable player model at the start
+        PlayerModel.SetActive(false); // Disable player model at the start
         tileManager = FindObjectOfType<TileManager>(); // Find TileManager
         playerAbility = GetComponent<PlayerAbility>();
         health = GetComponent<HealthSystem>();
+
+        playerObjectController = GetComponent<PlayerObjectController>();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-      
+        if (SceneManager.GetActiveScene().name == "Game")
+        {
             if (!PlayerModel.activeSelf)
             {
                 SetPosition();
@@ -42,6 +47,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
             // Check for water tiles around the player in each frame
             CheckForWaterTiles();
 
+if (playerObjectController.hasAuthority)
+{
             // Handle normal movement when not in WaterState
             if (currentState != BuffState.WaterState)
             {
@@ -72,6 +79,8 @@ public class PlayerMovementControllerTest : MonoBehaviour
                 }
             }
             rotationController.HandleMouseRotation(); // Use the rotation controller
+        }
+        }
     }
 
     public void SetPosition()
@@ -84,13 +93,13 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     public Vector3 Movement()
     {
-        float xDirection = Input.GetAxisRaw("Horizontal");
-        float yDirection = Input.GetAxisRaw("Vertical");
+        float xDirection = Input.GetAxis("Horizontal");
+        float yDirection = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = new Vector3(xDirection, yDirection, 0.0f);
 
-        // È·±£ÒÆ¶¯ÔÚ2DÆ½ÃæÉÏ
-        return moveDirection.normalized * Speed * Time.deltaTime;
+        // È·ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½2DÆ½ï¿½ï¿½ï¿½ï¿½
+        return moveDirection * Speed * Time.deltaTime;
     }
 
     private void CheckForWaterTiles()

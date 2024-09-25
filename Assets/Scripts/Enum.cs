@@ -7,3 +7,9 @@ public enum Element
     Metal,
     Earth
 }
+
+public enum Team
+{
+    TeamA,
+    TeamB
+}

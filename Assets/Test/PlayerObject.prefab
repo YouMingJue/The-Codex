@@ -796,6 +796,10 @@ GameObject:
   - component: {fileID: 8891326653193874498}
   - component: {fileID: 6697245248755223214}
   - component: {fileID: 7469089803320811290}
+  - component: {fileID: 7980077843722156581}
+  - component: {fileID: -3383886669027102399}
+  - component: {fileID: -2725839354913945901}
+  - component: {fileID: -1339397637084255834}
   m_Layer: 0
   m_Name: PlayerObject
   m_TagString: Player
@@ -852,7 +856,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.003822714, y: 0.0038226843}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -863,7 +867,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.0076454, y: 1.0229361}
   m_EdgeRadius: 0
 --- !u!50 &1548449074564478419
 Rigidbody2D:
@@ -880,7 +884,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -910,10 +914,10 @@ MonoBehaviour:
   checkRadius: 1
   tileLayer:
     serializedVersion: 2
-    m_Bits: 0
-  myCollid: {fileID: 0}
-  buffCost: 0
-  myRenderer: {fileID: 0}
+    m_Bits: 4294967295
+  myCollid: {fileID: 4502246884078308540}
+  buffCost: 5
+  myRenderer: {fileID: 8457342805175412517}
   rotationController: {fileID: 7087618385490577813}
 --- !u!95 &8891326653193874498
 Animator:
@@ -973,6 +977,80 @@ MonoBehaviour:
   currentHealth: 0
   isImmune: 0
   healthSlider: {fileID: 6140929528458080315}
+--- !u!114 &7980077843722156581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4086176599463778067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  visible: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &-3383886669027102399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4086176599463778067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  compressRotation: 0
+  interpolateScale: 1
+  interpolateRotation: 1
+  interpolatePosition: 1
+  syncScale: 1
+--- !u!114 &-2725839354913945901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4086176599463778067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 585ea34dced08b848a30d4c1b6e2c64a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  ConnectionID: 0
+  PlayerIdNumber: 0
+  PlayerSteamID: 0
+  PlayerName: 
+  Ready: 0
+  playerTeam: 0
+--- !u!114 &-1339397637084255834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4086176599463778067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8d91dcff690e54fba132f9c3575755, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerObjectController: {fileID: 0}
+  spriteRenderer: {fileID: 8457342805175412517}
 --- !u!1 &5201712471639850177
 GameObject:
   m_ObjectHideFlags: 0

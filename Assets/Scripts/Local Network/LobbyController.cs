@@ -16,9 +16,18 @@ public class LobbyController : MonoBehaviour
     public Text CountdownText;
 
     //Player Data
-    public GameObject PlayerListViewContent;
-    public GameObject PlayerListItemPrefab;
+    public GameObject teamAPlayerListViewContent;
+    //public Button teamAChooseButton;
+public GameObject teamBPlayerListViewContent;
+//public Button teamBChooseButton;
+    public GameObject playerListItemPrefab;
     public GameObject LocalPlayerObject;
+
+    private Dictionary<Team, List<PlayerObjectController>> teamPlayers = new Dictionary<Team, List<PlayerObjectController>>()
+    {
+        { Team.TeamA, new List<PlayerObjectController>() },
+        { Team.TeamB, new List<PlayerObjectController>() }
+    };
 
     //Other Data
     public ulong CurrentLobbyID;
@@ -54,10 +63,13 @@ public class LobbyController : MonoBehaviour
     private void Awake()
     {
         if(Instance == null) { Instance = this; }
+        manager = CustomNetworkManager.singleton as CustomNetworkManager;
     }
-    private void Start()
+
+   private void Start()
     {
-        FindLocalPlayer();
+        AutoAssignTeams();
+        //UpdateTeamUI();
     }
 
   
@@ -91,6 +103,8 @@ public class LobbyController : MonoBehaviour
     public void ReadyPlayer()
     {
         LocalplayerController.ChangeReady();
+        //AutoAssignTeams();
+        //UpdateTeamUI();
     }
 
     public void UpdateButton()
@@ -104,7 +118,6 @@ public class LobbyController : MonoBehaviour
             ReadyButtonText.text = "Ready";
         }
     }
-
 
     public void CheckIfAllReady()
     {
@@ -151,6 +164,9 @@ public class LobbyController : MonoBehaviour
         if(PlayerListItems.Count < Manager.GamePlayers.Count) { CreateClientPlayerItem();}
         if(PlayerListItems.Count > Manager.GamePlayers.Count) { RemovePlayerItem(); }
         if(PlayerListItems.Count == Manager.GamePlayers.Count) { UpdatePlayerItem(); }
+
+        AutoAssignTeams();
+        //UpdateTeamUI();
     }
 
     public void FindLocalPlayer()
@@ -171,17 +187,18 @@ public class LobbyController : MonoBehaviour
     {
         foreach(PlayerObjectController player in Manager.GamePlayers)
         {
-            GameObject NewPlayerItem = Instantiate(PlayerListItemPrefab) as GameObject;
+            GameObject NewPlayerItem = Instantiate(playerListItemPrefab) as GameObject;
             PlayerListItem NewPlayerItemScript = NewPlayerItem.GetComponent<PlayerListItem>();
 
             NewPlayerItemScript.PlayerName = player.PlayerName;
             NewPlayerItemScript.ConnectionID = player.ConnectionID;
             NewPlayerItemScript.PlayerSteamID = player.PlayerSteamID;
             NewPlayerItemScript.Ready = player.Ready;
+            NewPlayerItemScript.playerTeam = player.playerTeam;
             NewPlayerItemScript.SetPlayerValues();
 
 
-            NewPlayerItem.transform.SetParent(PlayerListViewContent.transform);
+            NewPlayerItem.transform.SetParent(teamAPlayerListViewContent.transform);
             NewPlayerItem.transform.localScale = Vector3.one;
 
             PlayerListItems.Add(NewPlayerItemScript);
@@ -195,17 +212,24 @@ public class LobbyController : MonoBehaviour
         {
             if(!PlayerListItems.Any(b => b.ConnectionID == player.ConnectionID))
             {
-                GameObject NewPlayerItem = Instantiate(PlayerListItemPrefab) as GameObject;
+                GameObject NewPlayerItem = Instantiate(playerListItemPrefab) as GameObject;
                 PlayerListItem NewPlayerItemScript = NewPlayerItem.GetComponent<PlayerListItem>();
 
                 NewPlayerItemScript.PlayerName = player.PlayerName;
                 NewPlayerItemScript.ConnectionID = player.ConnectionID;
                 NewPlayerItemScript.PlayerSteamID = player.PlayerSteamID;
                 NewPlayerItemScript.Ready = player.Ready;
+                NewPlayerItemScript.playerTeam = player.playerTeam;
                 NewPlayerItemScript.SetPlayerValues();
 
-
-                NewPlayerItem.transform.SetParent(PlayerListViewContent.transform);
+//if (player.playerTeam == Team.TeamA)
+//{
+                NewPlayerItem.transform.SetParent(teamAPlayerListViewContent.transform);
+//}
+// else if (player.playerTeam == Team.TeamB)
+// {
+//                 NewPlayerItem.transform.SetParent(teamBPlayerListViewContent.transform);
+// }
                 NewPlayerItem.transform.localScale = Vector3.one;
 
                 PlayerListItems.Add(NewPlayerItemScript);
@@ -223,6 +247,7 @@ public class LobbyController : MonoBehaviour
                 {
                     PlayerListItemScript.PlayerName = player.PlayerName;
                     PlayerListItemScript.Ready = player.Ready;
+                    PlayerListItemScript.playerTeam = player.playerTeam;
                     PlayerListItemScript.SetPlayerValues();
                     if(player == LocalplayerController)
                     {
@@ -290,5 +315,123 @@ public class LobbyController : MonoBehaviour
         }
 
         SceneManager.LoadScene("MainMenu");
+    }
+
+public void AutoAssignTeams()
+    {
+        foreach (PlayerObjectController player in manager.GamePlayers)
+        {
+            if (!player.Ready)
+            {
+                Team assignedTeam = teamPlayers[Team.TeamA].Count < teamPlayers[Team.TeamB].Count || teamPlayers[Team.TeamA].Count == teamPlayers[Team.TeamB].Count ? Team.TeamA : Team.TeamB;
+                if (teamPlayers[Team.TeamA].Count < 2 || teamPlayers[Team.TeamB].Count < 2)
+                {
+                    player.playerTeam = assignedTeam;
+                    teamPlayers[assignedTeam].Add(player);
+                    Debug.Log("Player's team is " + player.playerTeam);
+                }
+            }
+        }
+    }
+
+    public void ChangeTeam(PlayerObjectController player, Team newTeam)
+{
+    if (teamPlayers[player.playerTeam].Remove(player))
+    {
+        if (teamPlayers[newTeam].Count < 2)
+        {
+            player.playerTeam = newTeam;
+            teamPlayers[newTeam].Add(player);
+            UpdateTeamUI();
+        }
+        else
+        {
+            Debug.Log("Cannot change team: New team is full.");
+        }
+    }
+    else
+    {
+        Debug.Log("No change: Player not found in current team.");
+    }
+}
+
+    public void UpdateTeamUI()
+{
+    Debug.Log("Player current team: " + LocalplayerController.playerTeam);
+    
+    // 清空当前团队的UI元素
+    ClearChildren(teamAPlayerListViewContent.transform);
+    ClearChildren(teamBPlayerListViewContent.transform);
+    
+    // 遍历团队A的玩家并添加到列表
+    foreach (PlayerObjectController player in teamPlayers[Team.TeamA])
+    {
+        AddPlayerToList(teamAPlayerListViewContent, player);
+    }
+    
+    // 遍历团队B的玩家并添加到列表
+    foreach (PlayerObjectController player in teamPlayers[Team.TeamB])
+    {
+        AddPlayerToList(teamBPlayerListViewContent, player);
+    }
+
+    // 在这里更新玩家项
+    UpdatePlayerItem(); // 只需更新一次
+}
+
+private void AddPlayerToList(GameObject listViewContent, PlayerObjectController player)
+{
+    GameObject newItem = Instantiate(playerListItemPrefab, listViewContent.transform);
+    PlayerListItem itemScript = newItem.GetComponent<PlayerListItem>();
+    
+    if (itemScript != null)
+    {
+        itemScript.PlayerName = player.PlayerName;
+        itemScript.ConnectionID = player.ConnectionID;
+        itemScript.PlayerSteamID = player.PlayerSteamID;
+        itemScript.Ready = player.Ready;
+        itemScript.SetPlayerValues(); // 确保这方法设置了所有需要的属性
+    }
+}
+
+
+    private void ClearChildren(Transform parent)
+    {
+        foreach (Transform child in parent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+    
+//     private void SetupScrollViewEvents()
+// {
+//     teamAChooseButton.onClick.AddListener(SwitchToTeamA);
+//     teamBChooseButton.onClick.AddListener(SwitchToTeamB);
+// }
+
+    public void SwitchToTeamA()
+    {
+        if (LocalplayerController != null)
+        {
+            Debug.Log("Oh! A");
+        ChangeTeam(LocalplayerController, Team.TeamA);
+        }
+        else
+        {
+            Debug.Log("What's wrong???");
+        }
+    }
+
+    public void SwitchToTeamB()
+    {
+        if (LocalplayerController != null)
+        {
+            Debug.Log("Oh! B");
+        ChangeTeam(LocalplayerController, Team.TeamB);
+        }
+        else
+        {
+            Debug.Log("What's wrong???");
+        }
     }
 }
