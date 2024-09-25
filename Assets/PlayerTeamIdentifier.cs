@@ -10,7 +10,6 @@ public class PlayerTeamIdentifier : MonoBehaviour
     void Start()
     {
         playerObjectController = GetComponent<PlayerObjectController>();
-        spriteRenderer = GetComponent<SpriteRenderer>(); 
 
         SetPlayerTeamColor();
     }
