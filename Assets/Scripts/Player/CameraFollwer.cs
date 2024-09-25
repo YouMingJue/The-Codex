@@ -2,16 +2,16 @@ using UnityEngine;
 
 public class CameraFollower : MonoBehaviour
 {
-    public float smoothSpeed = 0.125f; // ÉãÏñ»úÆ½»¬ËÙ¶È
-    public Vector3 offset; // ÉãÏñ»úÏà¶ÔÓÚÄ¿±êµÄÆ«ÒÆÁ¿£¬ZÖá½«±»ºöÂÔ
+    public float smoothSpeed = 0.125f; // ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ù¶ï¿½
+    public Vector3 offset; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Zï¿½á½«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     private Transform target;
 
     private void Awake()
     {
-        // ÔÚAwakeÖĞÕÒµ½´øÓĞ"Player"±êÇ©µÄ¶ÔÏó
+        // ï¿½ï¿½Awakeï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½"Player"ï¿½ï¿½Ç©ï¿½Ä¶ï¿½ï¿½ï¿½
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null)
+        if (playerObject != null && playerObject.GetComponent<PlayerObjectController>().hasAuthority)
         {
             target = playerObject.transform;
         }
@@ -23,10 +23,10 @@ public class CameraFollower : MonoBehaviour
 
     private void LateUpdate()
     {
-        // LateUpdateÓÃÓÚÈ·±£ÔÚËùÓĞÎïÌåÒÆ¶¯Ö®ºó¸üĞÂÉãÏñ»úÎ»ÖÃ
+        // LateUpdateï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         if (target != null)
         {
-            // ¼ÆËãÆÚÍûÎ»ÖÃ£¬ºöÂÔZÖáµÄÆ«ÒÆÁ¿
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
             Vector3 desiredPosition = new Vector3(target.position.x + offset.x, target.position.y + offset.y, transform.position.z);
             Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
             transform.position = smoothedPosition;
