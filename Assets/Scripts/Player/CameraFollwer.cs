@@ -7,10 +7,10 @@ public class CameraFollower : MonoBehaviour
 
     private Transform target;
 
-    private void Start()
+    private void Awake()
     {
         // ��Awake���ҵ�����"Player"��ǩ�Ķ���
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        GameObject playerObject = GameObject.FindObjectOfType<PlayerObjectController>().gameObject;
         if (playerObject != null && playerObject.GetComponent<PlayerObjectController>().hasAuthority)
         {
             target = playerObject.transform;
