@@ -16,9 +16,12 @@ public class PlayerListItem : MonoBehaviour
     public Text PlayerReadyText;
     public bool Ready;
 
+    public Text playerTeamText;
+    public Team playerTeam;
 
     protected Callback<AvatarImageLoaded_t> ImageLoaded;
 
+    public Vector3 scale = new Vector3(1f, 1f, 1f);
 
     public void ChangeReadyStatus()
     {
@@ -34,8 +37,6 @@ public class PlayerListItem : MonoBehaviour
         }
     }
 
-
-
     private void Start()
     {
         ImageLoaded = Callback<AvatarImageLoaded_t>.Create(OnImageLoaded);
@@ -46,8 +47,10 @@ public class PlayerListItem : MonoBehaviour
         PlayerNameText.text = PlayerName;
         ChangeReadyStatus();
         if (!AvatarReceived) { GetPlayerIcon(); }
-    }
 
+        transform.localScale = scale;
+        ChangePlayerTeamStatus();
+    }
 
     void GetPlayerIcon()
     {
@@ -89,4 +92,8 @@ public class PlayerListItem : MonoBehaviour
         }
     }
 
+    public void ChangePlayerTeamStatus()
+    {
+        playerTeamText.text = playerTeam.ToString();
+    }
 }

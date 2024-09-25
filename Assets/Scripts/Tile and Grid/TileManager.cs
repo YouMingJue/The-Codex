@@ -37,6 +37,7 @@ public class TileManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
+                #if UNITY_EDITOR
                 GameObject tile = PrefabUtility.InstantiatePrefab(tilePrefab, transform) as GameObject;
                 if(tile.TryGetComponent<Tile>(out Tile tileEntity))
                 {
@@ -46,6 +47,7 @@ public class TileManager : MonoBehaviour
                     tiles[x, y] = tileEntity;
                     tile.transform.position = position;
                 }
+                #endif
 
                 // Mark the tile as part of the scene for saving
                 //Undo.RegisterCreatedObjectUndo(tile, "Create Tile");
@@ -62,7 +64,11 @@ public class TileManager : MonoBehaviour
         // Destroy all existing tiles
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
+            #if UNITY_EDITOR
             Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
+#else
+            Destroy(transform.GetChild(i).gameObject);
+#endif
         }
     }
 
