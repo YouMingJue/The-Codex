@@ -17,6 +17,7 @@ public class PlayerTeamIdentifier : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        SetPlayerTeamColor();
     }
 
     private void SetPlayerTeamColor()
