@@ -43,7 +43,7 @@ public class PlayerMovementController : NetworkBehaviour
             {
                 myCollid.enabled = false;
                 
-                if(Physics2D.OverlapPoint(transform.position + Movement()).GetComponent<Tile>().type == TileType.Water && playerAbility.Mana >= buffCost)
+                if(Physics2D.OverlapPoint(transform.position + Movement()).GetComponent<TileBehavior>().element == Element.Water && playerAbility.Mana >= buffCost)
                 {
                     transform.position += Movement();
                     playerAbility.Mana -= buffCost * 1.2f;
@@ -77,16 +77,16 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.TryGetComponent<Tile>(out Tile tile))
+        if (collision.TryGetComponent<TileBehavior>(out TileBehavior tile))
         {
             if (tile != null)
             {
-                switch (tile.type)
+                switch (tile.element)
                 {
-                    case TileType.Fire:
+                    case Element.Fire:
                         break;
-                    case TileType.Water:
-                        if (playerAbility.element != TileType.Water) return;
+                    case Element.Water:
+                        if (playerAbility.element != Element.Water) return;
                         if (Input.GetKeyDown(KeyCode.LeftShift) && playerAbility.Mana >= buffCost)
                         {
                             currentState = BuffState.WaterState;

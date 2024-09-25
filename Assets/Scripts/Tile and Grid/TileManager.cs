@@ -1,68 +1,28 @@
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic; // Required to use Editor functionality
+using System.Collections.Generic;
+using UnityEngine.Tilemaps;
+using System.Linq;
 
 [ExecuteInEditMode] // This attribute allows the script to run in the editor
 public class TileManager : MonoBehaviour
 {
-    public GameObject tilePrefab;
-    public int width = 10;
-    public int height = 10;
     public Vector2Int playerStartPosition;
+    public Tilemap tilemap;
+    public List<TileBehavior> tiles = new List<TileBehavior>();
     public static TileManager instance { get; private set; }
-
-    [SerializeField] private Tile[,] tiles;
 
     private void Awake()
     {
+        // Check if the instance already exists and enforce singleton pattern
         if (instance == null)
         {
             instance = this;
         }
         else
         {
+            // If another instance exists, destroy this one
             Destroy(gameObject);
-        }
-        GenerateGrid();
-    }
-
-    [ContextMenu("Generate Grid")] // Adds this function to the right-click menu in the inspector
-    public void GenerateGrid()
-    {
-        // Clear any existing tiles to avoid duplicates
-        ClearGrid();
-
-        tiles = new Tile[width, height];
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                GameObject tile = PrefabUtility.InstantiatePrefab(tilePrefab, transform) as GameObject;
-                if(tile.TryGetComponent<Tile>(out Tile tileEntity))
-                {
-                    tileEntity.Init();
-                    Vector3 position = new Vector3(x * tileEntity.size.x, y * tileEntity.size.y, 0);
-                    tileEntity.position = new Vector2Int(x, y);
-                    tiles[x, y] = tileEntity;
-                    tile.transform.position = position;
-                }
-
-                // Mark the tile as part of the scene for saving
-                //Undo.RegisterCreatedObjectUndo(tile, "Create Tile");
-            }
-        }
-        // Mark the scene as dirty to ensure changes are saved
-        //EditorUtility.SetDirty(gameObject);
-    }
-
-    // Clear the grid in the editor
-    [ContextMenu("Clear Grid")]
-    public void ClearGrid()
-    {
-        // Destroy all existing tiles
-        for (int i = transform.childCount - 1; i >= 0; i--)
-        {
-            Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
         }
     }
 
@@ -71,39 +31,23 @@ public class TileManager : MonoBehaviour
         return new Vector3(playerStartPosition.x, playerStartPosition.y, 0);
     }
 
-    public List<Tile> GetSurroundingTiles(Vector2Int positon)
+    public List<TileBehavior> GetSurroundingTiles(Vector3Int positon)
     {
-        List<Tile> neighboringTiles = new List<Tile>();
+        List<TileBehavior> neighboringTiles = new List<TileBehavior>();
         // Check each neighboring tile and only add it if it's within the grid bounds
-        if (positon.x > 0) // Check left
-        {
-            neighboringTiles.Add(tiles[positon.x - 1, positon.y]);
-        }
-
-        if (positon.x < width - 1) // Check right
-        {
-            neighboringTiles.Add(tiles[positon.x + 1, positon.y]);
-        }
-
-        if (positon.y < height - 1) // Check up
-        {
-            neighboringTiles.Add(tiles[positon.x, positon.y + 1]);
-        }
-
-        if (positon.y > 0) // Check down
-        {
-            neighboringTiles.Add(tiles[positon.x, positon.y - 1]);
+            for (int xd = -1; xd <= 1; xd++)
+            {
+                for (int yd = -1; yd <= 1; yd++)
+                {
+                    if((xd == 0 && yd == 0) || (xd == 1 && yd == 1) || (xd == -1 && yd == -1) || (xd == -1 && yd == 1) || (xd == 1 && yd == -1)) continue;
+                    Vector3Int targetPosition = positon + new Vector3Int(xd, yd, 0);
+                    GameObject go = tilemap.GetInstantiatedObject(targetPosition);
+                    if (go != null && go.TryGetComponent(out TileBehavior neighborBehavior)) 
+                    {
+                        if (neighborBehavior != null)neighboringTiles.Add(neighborBehavior);
+                    }
+                }
         }
         return neighboringTiles;
-    }
-
-    private void OnApplicationQuit()
-    {
-        ClearGrid();
-    }
-
-    private void OnDisable()
-    {
-        ClearGrid();
     }
 }

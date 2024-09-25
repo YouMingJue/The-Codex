@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ElementalObject : MonoBehaviour
 {
-    [SerializeField] private TileType element;
+    [SerializeField] private Element element;
     [SerializeField] private float radiateRange;
     [SerializeField] private float radiateCD;
 
@@ -23,10 +23,10 @@ public class ElementalObject : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radiateRange);
         foreach (Collider2D tileCollider in colliders)
         {
-            Tile tile = tileCollider.GetComponent<Tile>();
+            TileBehavior tile = tileCollider.GetComponent<TileBehavior>();
             if (tile != null)
             {
-                tile.originalType = element;
+                tile.originalElement = element;
             }
         }
     }

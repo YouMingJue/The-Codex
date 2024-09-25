@@ -55,7 +55,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
                 Speed = 7; // Increase speed in WaterState
 
                 // Move player if the next tile is water and has enough mana
-                if (Physics2D.OverlapPoint(transform.position + Movement())?.GetComponent<Tile>()?.type == TileType.Water && playerAbility.Mana >= buffCost)
+                if (Physics2D.OverlapPoint(transform.position + Movement())?.GetComponent<TileBehavior>()?.element == Element.Water && playerAbility.Mana >= buffCost)
                 {
                     transform.position += Movement();
                     playerAbility.Mana -= buffCost * 1.2f * Time.deltaTime;
@@ -102,13 +102,13 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            Tile tile = collider.GetComponent<Tile>();
-            if (tile != null && tile.type == TileType.Water)
+            TileBehavior tile = collider.GetComponent<TileBehavior>();
+            if (tile != null && tile.element == Element.Water)
             {
                 isInWaterTile = true; // Set flag to true if we detect a water tile
 
                 // Activate WaterState if 'Q' is pressed and conditions are met
-                if (Input.GetKeyDown(KeyCode.Q) && currentState != BuffState.WaterState && playerAbility.element == TileType.Water && playerAbility.Mana >= buffCost)
+                if (Input.GetKeyDown(KeyCode.Q) && currentState != BuffState.WaterState && playerAbility.element == Element.Water && playerAbility.Mana >= buffCost)
                 {
                     EnterWaterState();
                 }
@@ -148,13 +148,13 @@ public class PlayerMovementControllerTest : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.TryGetComponent<Tile>(out Tile tile))
+        if (collision.TryGetComponent<TileBehavior>(out TileBehavior tile))
         {
             if (tile != null)
             {
-                switch (tile.type)
+                switch (tile.element)
                 {
-                    case TileType.Fire:
+                    case Element.Fire:
 
                         break;
                 }
@@ -163,14 +163,14 @@ public class PlayerMovementControllerTest : MonoBehaviour
     }
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.TryGetComponent<Tile>(out Tile tile))
+        if (collision.TryGetComponent<TileBehavior>(out TileBehavior tile))
         {
             if (tile != null)
             {
-                switch (tile.type)
+                switch (tile.element)
                 {
-                    case TileType.Fire:
-                        if (playerAbility.element == TileType.Fire) return;
+                    case Element.Fire:
+                        if (playerAbility.element == Element.Fire) return;
                         health.TakeDamage(5*Time.deltaTime,tile.transform);
                         break;
                 }
