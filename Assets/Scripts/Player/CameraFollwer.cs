@@ -2,31 +2,33 @@ using UnityEngine;
 
 public class CameraFollower : MonoBehaviour
 {
-    public float smoothSpeed = 0.125f; // �����ƽ���ٶ�
-    public Vector3 offset; // ����������Ŀ���ƫ������Z�Ὣ������
+    public float smoothSpeed = 0.125f;
+    public Vector3 offset; 
 
     private Transform target;
 
     private void Awake()
+{
+    PlayerObjectController[] players = FindObjectsOfType<PlayerObjectController>();
+    foreach (PlayerObjectController player in players)
     {
-        // ��Awake���ҵ�����"Player"��ǩ�Ķ���
-        GameObject playerObject = GameObject.FindObjectOfType<PlayerObjectController>().gameObject;
-        if (playerObject != null && playerObject.GetComponent<PlayerObjectController>().hasAuthority)
+        if (player.hasAuthority)
         {
-            target = playerObject.transform;
-        }
-        else
-        {
-            Debug.LogError("No player found with 'Player' tag.");
+            target = player.transform;
+            break;
         }
     }
 
+    if (target == null)
+    {
+        Debug.LogError("No player found with authority.");
+    }
+}
+
     private void LateUpdate()
     {
-        // LateUpdate����ȷ�������������ƶ�֮����������λ��
         if (target != null)
         {
-            // ��������λ�ã�����Z���ƫ����
             Vector3 desiredPosition = new Vector3(target.position.x + offset.x, target.position.y + offset.y, transform.position.z);
             Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
             transform.position = smoothedPosition;
