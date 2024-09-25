@@ -222,14 +222,14 @@ public GameObject teamBPlayerListViewContent;
                 NewPlayerItemScript.playerTeam = player.playerTeam;
                 NewPlayerItemScript.SetPlayerValues();
 
-if (player.playerTeam == Team.TeamA)
-{
+//if (player.playerTeam == Team.TeamA)
+//{
                 NewPlayerItem.transform.SetParent(teamAPlayerListViewContent.transform);
-}
-else if (player.playerTeam == Team.TeamB)
-{
-                NewPlayerItem.transform.SetParent(teamBPlayerListViewContent.transform);
-}
+//}
+// else if (player.playerTeam == Team.TeamB)
+// {
+//                 NewPlayerItem.transform.SetParent(teamBPlayerListViewContent.transform);
+// }
                 NewPlayerItem.transform.localScale = Vector3.one;
 
                 PlayerListItems.Add(NewPlayerItemScript);

@@ -958,8 +958,8 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs:
-  - {fileID: 6966547381864917919, guid: 33e9ee5f0c659344e93e701bad7d4338, type: 3}
-  GamePlayerPrefab: {fileID: 7088520109087995208, guid: 33e9ee5f0c659344e93e701bad7d4338, type: 3}
+  - {fileID: 4086176599463778067, guid: fb6953c700b951440aff9a4744b0b0fb, type: 3}
+  GamePlayerPrefab: {fileID: -2725839354913945901, guid: fb6953c700b951440aff9a4744b0b0fb, type: 3}
 --- !u!4 &2017064682
 Transform:
   m_ObjectHideFlags: 0
