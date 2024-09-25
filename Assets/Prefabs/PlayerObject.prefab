@@ -106,6 +106,7 @@ MonoBehaviour:
   PlayerSteamID: 0
   PlayerName: 
   Ready: 0
+  playerTeam: 0
 --- !u!114 &7809487451872842862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,6 +124,8 @@ MonoBehaviour:
   Speed: 5
   PlayerModel: {fileID: 4353065852129407635}
   tileManager: {fileID: 0}
+  myCollid: {fileID: 0}
+  buffCost: 0
 --- !u!114 &4220354584420863134
 MonoBehaviour:
   m_ObjectHideFlags: 0

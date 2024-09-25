@@ -13,6 +13,8 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string PlayerName;
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool Ready;
 
+    [SyncVar] public Team playerTeam;
+
     private CustomNetworkManager manager;
 
     private CustomNetworkManager Manager
@@ -68,6 +70,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     public override void OnStartClient()
     {
+        base.OnStartClient();
         Manager.GamePlayers.Add(this);
         LobbyController.Instance.UpdateLobbyName();
         LobbyController.Instance.UpdatePlayerList();
