@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -19,8 +20,9 @@ public class Player : MonoBehaviour
 public class WinningConditionManager : MonoBehaviour
 {
     private Dictionary<int, int> teamLifeStock; // Key: team number, Value: life stock
+    [SerializeField] TextMeshProUGUI teamText;
+    [SerializeField] GameObject winningCanvas;
 
-    // Start is called before the first frame update
     void Start()
     {
         teamLifeStock = new Dictionary<int, int>
@@ -57,13 +59,14 @@ public class WinningConditionManager : MonoBehaviour
         if (teamNumber == 0)
         {
             Debug.Log("Team A has lost the game!");
-            // Add logic for Team A losing
+            teamText.text = "B";
         }
         else if (teamNumber == 1)
         {
             Debug.Log("Team B has lost the game!");
-            // Add logic for Team B losing
+            teamText.text = "A";
         }
+        winningCanvas.SetActive(true);
     }
 }
 

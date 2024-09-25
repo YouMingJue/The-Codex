@@ -9,13 +9,13 @@ using UnityEngine.EventSystems;
 
 public class PlayerAbility : MonoBehaviour
 {
-    private Animator animator;
 
-    [SerializeField] private Collider2D normalAttackRange;
-    [SerializeField] private Collider2D elementalAttackRange;
+    [SerializeField] private Collider2D AttackRange;
     [SerializeField] private LayerMask targetLayer;
-    [SerializeField] public TileType element;
+    [SerializeField] public Element element;
     [SerializeField] private float mana = 100;
+    [SerializeField] Animator animator;
+    private bool isAttacking = false;
     public float Mana {
         get { return mana; }
         set {
@@ -36,8 +36,6 @@ public class PlayerAbility : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Get the Animator component attached to the current object
-        animator = GetComponent<Animator>();
         manaBar.maxValue = mana;
         manaBar.value = mana;
     }
@@ -45,40 +43,40 @@ public class PlayerAbility : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log("move");
         // Check for left mouse click
-        if (Input.GetMouseButtonDown(0) && !IsMouseOverUI()) 
+        if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking) 
         {
-            //Debug.Log("move");
+            Debug.Log("move");
             // Trigger the NormalAttack animation
-            animator.SetTrigger("NormalAttack");
+            animator.SetTrigger("LightAttack");
         }
 
-        if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI())
+        if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
         {
-
-            animator.SetTrigger("ElementAttack");
+            animator.SetTrigger("HeavyAttack");
         }
     }
 
     public void NormalAttack()
     {
+        isAttacking = true;
         List<Collider2D> colliders = new List<Collider2D>();
         ContactFilter2D filter = new ContactFilter2D();
         filter.SetLayerMask(targetLayer);
         filter.useTriggers = true;
-        normalAttackRange.enabled = true;
-        Physics2D.OverlapCollider(normalAttackRange, filter, colliders);
+        AttackRange.enabled = true;
+        Physics2D.OverlapCollider(AttackRange, filter, colliders);
 
         foreach (Collider2D collider in colliders)
         {
             Attack(collider, 20);
         }
-        normalAttackRange.enabled = false;
+        AttackRange.enabled = false;
     }
 
     public void ElmentalAttack()
     {
+        isAttacking = true;
         Mana -= manaCostAmount;
         if (manaBar != null)
         {
@@ -89,19 +87,19 @@ public class PlayerAbility : MonoBehaviour
         ContactFilter2D filter = new ContactFilter2D();
         filter.SetLayerMask(targetLayer);
         filter.useTriggers = true;
-        elementalAttackRange.enabled = true;
-        Physics2D.OverlapCollider(elementalAttackRange,filter, colliders);
+        AttackRange.enabled = true;
+        Physics2D.OverlapCollider(AttackRange, filter, colliders);
 
         foreach (Collider2D collider in colliders)
         {
             Attack(collider, 30);
-            Tile tile = collider.GetComponent<Tile>();
+            TileBehavior tile = collider.GetComponent<TileBehavior>();
             if (tile != null) 
             {
                 tile.PaintTile(element);
             }
         }
-        elementalAttackRange.enabled = false;
+        AttackRange.enabled = false;
     }
 
     public void RestoreMana(int restoreAmount)
@@ -118,6 +116,13 @@ public class PlayerAbility : MonoBehaviour
     }
 
     private bool IsMouseOverUI(){
-        return EventSystem.current.IsPointerOverGameObject();
+        //return EventSystem.current.IsPointerOverGameObject();
+        return false;
     }//To detect if the cursor is over UI, don't attack
+
+
+    public void EndAttack()
+    {
+        isAttacking = false;
+    }
 }

@@ -244,6 +244,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7980077843722156581, guid: fb6953c700b951440aff9a4744b0b0fb, type: 3}
+      propertyPath: sceneId
+      value: 1832985589
+      objectReference: {fileID: 0}
     - target: {fileID: 8457342805175412517, guid: fb6953c700b951440aff9a4744b0b0fb, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -455,7 +459,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -10
   m_Sprite: {fileID: 3625043607559282579, guid: 19fb86013d8c24d6cb8410c0aadf30fa, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.23018861, g: 0.23018861, b: 0.23018861, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

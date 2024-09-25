@@ -24,8 +24,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         circleCollider = GetComponent<CircleCollider2D>();
-        sprite = GetComponent<SpriteRenderer>();
-        anim = GetComponent<Animator>();
+        sprite = anim.GetComponent<SpriteRenderer>();
     }
 
     private void Update()
@@ -45,11 +44,17 @@ public class PlayerController : MonoBehaviour
         float xInputAxis = Input.GetAxis("Horizontal");
         float yInputAxis = Input.GetAxis("Vertical");
         Vector2 InputDirection = new Vector2(xInputAxis, yInputAxis);
-        if(xInputAxis != 0) sprite.flipX = xInputAxis < 0;
+        if(xInputAxis != 0) FlipHorizontally(xInputAxis);
         velocity = Vector2.MoveTowards(velocity, InputDirection * moveSpeed, moveSpeed * Time.deltaTime * frictionFactor);
         velocity = Vector2.ClampMagnitude(velocity, moveSpeed);
         anim.SetFloat("Velocity", Mathf.Abs(velocity.magnitude));
-        Debug.Log("current speed: "+velocity.magnitude);
+    }
+
+    void FlipHorizontally(float inputX)
+    {
+        Vector3 newScale = anim.transform.localScale;
+        newScale.x = Mathf.Abs(newScale.x) * Mathf.Sign(inputX);
+        anim.transform.localScale = newScale;
     }
 }
 
