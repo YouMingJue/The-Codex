@@ -20,18 +20,16 @@ public class TileBehavior : NetworkBehaviour
     public Vector3Int position;
 
     [SerializeField]
-    private float convertCD = 3.2f;
+    public float convertCD = 3.2f;
     [SerializeField]
-    private float restoreCD = 3;
+    public float restoreCD = 3;
 
     private List<TileBehavior> neighboringTiles;
 
     public void Init(ElementalTile tile, Vector3Int cellPos)
     {
-        if (isServer)
-        {
+
             CmdInit(tile, cellPos);
-        }
     }
 
     private void Start()
@@ -49,7 +47,7 @@ public class TileBehavior : NetworkBehaviour
     }
 
 
-    [Command]
+    [Server]
     public void CmdInit(ElementalTile tile, Vector3Int cellPos)
     {
         _tile = tile;
@@ -117,7 +115,7 @@ public class TileBehavior : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RpcUpdateTileOnClients()
+    public void RpcUpdateTileOnClients()
     {
         _tile.RefreshTile(position, TileManager.instance.tilemap);
     }
@@ -158,17 +156,15 @@ public class TileBehavior : NetworkBehaviour
         return false;
     }
 
+    public PlayerAbility relatedPlayer;
     public void PaintTile(Element paintType)
     {
         if (!IsOvercoming(paintType))
         {
-            if (isServer)
+            PlayerAbility playerAbility = FindObjectOfType<PlayerAbility>();
+            if (playerAbility != null)
             {
-                CmdConvertTile(paintType);
-            }
-            else
-            {
-                CmdRequestTileConversion(paintType);
+                playerAbility.PlayerConvertTile(paintType);
             }
         }
     }

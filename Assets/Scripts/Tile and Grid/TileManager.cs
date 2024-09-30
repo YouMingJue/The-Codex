@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 using System.Linq;
 using Mirror;
 
-[ExecuteInEditMode] // This attribute allows the script to run in the editor
+[ExecuteInEditMode]
 public class TileManager : MonoBehaviour
 {
     public Vector2Int playerStartPosition;
@@ -36,19 +36,70 @@ public class TileManager : MonoBehaviour
     {
         List<TileBehavior> neighboringTiles = new List<TileBehavior>();
         // Check each neighboring tile and only add it if it's within the grid bounds
-            for (int xd = -1; xd <= 1; xd++)
+        for (int xd = -1; xd <= 1; xd++)
+        {
+            for (int yd = -1; yd <= 1; yd++)
             {
-                for (int yd = -1; yd <= 1; yd++)
+                if ((xd == 0 && yd == 0) || (xd == 1 && yd == 1) || (xd == -1 && yd == -1) || (xd == -1 && yd == 1) || (xd == 1 && yd == -1)) continue;
+                Vector3Int targetPosition = positon + new Vector3Int(xd, yd, 0);
+                GameObject go = tilemap.GetInstantiatedObject(targetPosition);
+                if (go != null && go.TryGetComponent(out TileBehavior neighborBehavior))
                 {
-                    if((xd == 0 && yd == 0) || (xd == 1 && yd == 1) || (xd == -1 && yd == -1) || (xd == -1 && yd == 1) || (xd == 1 && yd == -1)) continue;
-                    Vector3Int targetPosition = positon + new Vector3Int(xd, yd, 0);
-                    GameObject go = tilemap.GetInstantiatedObject(targetPosition);
-                    if (go != null && go.TryGetComponent(out TileBehavior neighborBehavior)) 
-                    {
-                        if (neighborBehavior != null)neighboringTiles.Add(neighborBehavior);
-                    }
+                    if (neighborBehavior != null) neighboringTiles.Add(neighborBehavior);
                 }
+            }
         }
         return neighboringTiles;
+    }
+
+    private bool isTileInitialized = false;
+    public void InitializeTilesForNetwork()
+    {
+        if (!isTileInitialized)
+        {
+            // 直接获取自身挂载的Tilemap组件
+            Tilemap tilemap = GetComponent<Tilemap>();
+            if (tilemap != null)
+            {
+                // 遍历Tilemap中的每个位置并处理Tile
+                BoundsInt bounds = tilemap.cellBounds;
+                for (int x = bounds.min.x; x < bounds.max.x; x++)
+                {
+                    for (int y = bounds.min.y; y < bounds.max.y; y++)
+                    {
+                        Vector3Int position = new Vector3Int(x, y, 0);
+                        GameObject go = tilemap.GetInstantiatedObject(position);
+                        if (go != null)
+                        {
+                            // 如果游戏对象没有NetworkIdentity组件，添加一个
+                            if (!go.GetComponent<NetworkIdentity>())
+                            {
+                                go.AddComponent<NetworkIdentity>();
+                            }
+                        }
+                    }
+                }
+                if (NetworkServer.active)
+                {
+                    // 如果需要特定的权限设置，可以根据实际情况调整
+                    // 这里假设将服务器连接作为权限赋予
+                    NetworkIdentity[] identities = GetComponentsInChildren<NetworkIdentity>();
+                    foreach (NetworkIdentity identity in identities)
+                    {
+                        identity.AssignClientAuthority(NetworkServer.localConnection);
+                    }
+                }
+                else
+                {
+                    // 如果是客户端，可能需要移除权限（如果之前有设置）
+                    NetworkIdentity[] identities = GetComponentsInChildren<NetworkIdentity>();
+                    foreach (NetworkIdentity identity in identities)
+                    {
+                        identity.RemoveClientAuthority();
+                    }
+                }
+            }
+            isTileInitialized = true;
+        }
     }
 }

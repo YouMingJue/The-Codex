@@ -286,6 +286,12 @@ public GameObject teamBPlayerListViewContent;
     public void StartGame(string SceneName)
     {
         LocalplayerController.CanStartGame(SceneName);
+
+        /*TileManager tileManager = TileManager.instance;
+        if (tileManager != null)
+        {
+            tileManager.PrepareForGame();
+        }*/
     }
 
     public void InviteFriendsToLobby()

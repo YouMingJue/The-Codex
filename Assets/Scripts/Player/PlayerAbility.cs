@@ -10,13 +10,15 @@ using System;
 using UnityEngine.Tilemaps;
 //using UnityEngine.WSA;
 using UnityEngine.SceneManagement;
+using Mirror;
 
 public enum Buff
 {
     None,
     WaterState
 }
-public class PlayerAbility : MonoBehaviour
+
+public class PlayerAbility : NetworkBehaviour
 {
     private Buff currentState = Buff.None;
     [SerializeField] private Collider2D AttackRange;
@@ -49,7 +51,49 @@ public class PlayerAbility : MonoBehaviour
     [SerializeField] private UnityEngine.UI.Slider manaBar;
     [SerializeField] private float fireDamage;
 
-    // Start is called before the first frame update
+    // 新增方法用于发送转换Tile的命令
+    public void SendCmdConvertTile(Element convertType)
+    {
+        if (playerObjectController.hasAuthority)
+        {
+            // 这里假设通过当前玩家位置获取Tile，可能需要根据实际情况调整
+            Vector3Int currentTilePos = TileManager.instance.tilemap.WorldToCell(transform.position);
+            TileBehavior currentTile = TileManager.instance.tilemap.GetInstantiatedObject(currentTilePos)?.GetComponent<TileBehavior>();
+            if (currentTile != null)
+            {
+                currentTile.CmdConvertTile(convertType);
+            }
+        }
+    }
+
+    public void PlayerConvertTile(Element convertType)
+    {
+        CmdConvertTileOnPlayer(convertType);
+    }
+
+    [Command]
+    public void CmdConvertTileOnPlayer(Element convertType)
+    {
+        // 首先找到当前玩家所在位置对应的Tile
+        Vector3Int currentTilePos = TileManager.instance.tilemap.WorldToCell(transform.position);
+        TileBehavior currentTile = TileManager.instance.tilemap.GetInstantiatedObject(currentTilePos)?.GetComponent<TileBehavior>();
+        if (currentTile != null)
+        {
+            // 在Tile上执行转换逻辑
+            currentTile.element = convertType;
+            currentTile._tile.RefreshTile(currentTile.position, TileManager.instance.tilemap);
+            currentTile.restoreCD = 5;
+            currentTile.convertCD = 3;
+            if (convertType == Element.Fire)
+            {
+                // 这里假设GenerateFireEffect是Tile上的方法，如果需要在玩家脚本处理，逻辑需要调整
+                // currentTile.GenerateFireEffect();
+            }
+            currentTile.RpcUpdateTileOnClients();
+        }
+    }
+
+    // Start是在对象初始化时调用一次
     void Start()
     {
         manaBar.maxValue = mana;
@@ -57,10 +101,10 @@ public class PlayerAbility : MonoBehaviour
         UpdateTilePos();
 
         playerObjectController = GetComponent<PlayerObjectController>();
-        health.OnDeath += ResetPlayer; 
+        health.OnDeath += ResetPlayer;
     }
 
-    // Update is called once per frame
+    // Update是每一帧调用一次
     void Update()
     {
         if (playerObjectController.hasAuthority)
@@ -68,7 +112,7 @@ public class PlayerAbility : MonoBehaviour
             switch (element)
             {
                 case Element.Water:
-                    // Check if the player is on a water tile and presses LeftShift
+                    // 检查玩家是否在水瓦片上并且按下左Shift键
                     if (currentTile != null && currentTile.element == Element.Water && currentState == Buff.None)
                     {
                         if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= manaCostAmount)
@@ -87,14 +131,14 @@ public class PlayerAbility : MonoBehaviour
                     break;
             }
 
-            // Check for left mouse click (light attack)
+            // 检查左键点击（轻攻击）
             if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking)
             {
                 isAttacking = true;
                 animator.SetTrigger("LightAttack");
             }
 
-            // Check for E key (heavy attack)
+            // 检查E键（重攻击）
             if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
             {
                 isAttacking = true;
@@ -139,6 +183,8 @@ public class PlayerAbility : MonoBehaviour
             TileBehavior tile = collider.GetComponent<TileBehavior>();
             if (tile != null)
             {
+                // 建立Player与Tile的引用关系
+                tile.relatedPlayer = this;
                 tile.PaintTile(element);
             }
         }
@@ -181,12 +227,11 @@ public class PlayerAbility : MonoBehaviour
         {
             case Buff.WaterState:
                 Mana -= ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
-                       ? manaCostAmount * 1.5f : manaCostAmount * 0.4f) * Time.fixedDeltaTime;
-                // Check if the player is standing on a water tile
+                      ? manaCostAmount * 1.5f : manaCostAmount * 0.4f) * Time.fixedDeltaTime;
+                // 检查玩家是否站在水瓦片上
                 if (currentTile == null || currentTile.element != Element.Water)
                 {
-
-                    // Trigger interaction with the current tile (even if it's not water)
+                    // 触发与当前瓦片的交互（即使不是水瓦片）
                     onTileInteraction?.Invoke(currentTile);
                 }
                 break;
@@ -197,10 +242,10 @@ public class PlayerAbility : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "Playground")
         {
-            // Convert world position to tilemap cell position
+            // 将世界坐标转换为瓦片地图的单元格位置
             Vector3Int cellPosition = TileManager.instance.tilemap.WorldToCell(transform.position);
 
-            // If the player has moved to a new cell, update the current tile
+            // 如果玩家移动到了新的单元格，更新当前瓦片
             if (cellPosition != currentTilePos)
             {
                 currentTilePos = cellPosition;
@@ -211,7 +256,7 @@ public class PlayerAbility : MonoBehaviour
 
     void TileEvent()
     {
-        switch (currentTile?.element) 
+        switch (currentTile?.element)
         {
             case Element.Fire:
                 if (element == Element.Fire) return;

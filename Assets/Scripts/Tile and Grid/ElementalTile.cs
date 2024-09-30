@@ -31,10 +31,20 @@ public class ElementalTile : Tile
             TileBehavior tileObject = go.GetComponent<TileBehavior>();
             tileObject.Init(this, position);
 
-            if (!go.GetComponent<NetworkIdentity>())
-            {
-                go.AddComponent<NetworkIdentity>();
-            }
+            //if (!go.GetComponent<NetworkIdentity>())
+            //{
+            //    go.AddComponent<NetworkIdentity>();
+            //}
+
+            //NetworkIdentity identity = go.GetComponent<NetworkIdentity>();
+            //if (NetworkServer.active)
+            //{
+            //    identity.AssignClientAuthority(NetworkServer.localConnection);
+            //}
+            //else
+            //{
+            //    identity.RemoveClientAuthority();
+            //}
         }
         return base.StartUp(position, tilemap, go);
     }
