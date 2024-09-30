@@ -8,7 +8,7 @@ public enum Element
     Earth
 }
 
-public enum Team
+public enum Team: int
 {
     TeamA,
     TeamB

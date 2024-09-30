@@ -29,6 +29,14 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
+    void Awake()
+    {
+        Writer<Team>.write = TeamWriter.Write;
+        Reader<Team>.read = TeamReader.Read;
+        System.Type teamEnumType = typeof(Team);
+        Debug.Log($"Underlying type of Team enum: {teamEnumType.GetType()}");
+    }
+
     private void Start()
     {
         DontDestroyOnLoad(this.gameObject);
@@ -118,4 +126,20 @@ public class PlayerObjectController : NetworkBehaviour
         manager.StartGame(SceneName);
     }
 
+    public static class TeamWriter
+    {
+        public static void Write(NetworkWriter writer, Team value)
+        {
+            writer.WriteInt((int)value);
+        }
+    }
+
+    public static class TeamReader
+    {
+        public static Team Read(NetworkReader reader)
+        {
+            int intValue = reader.ReadInt();
+            return (Team)intValue;
+        }
+    }
 }
