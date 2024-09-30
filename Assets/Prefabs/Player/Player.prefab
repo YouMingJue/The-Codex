@@ -37,7 +37,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.14, y: 1.27}
+  m_AnchoredPosition: {x: 0.14, y: 1.9}
   m_SizeDelta: {x: 182, y: 102.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &9020728043477404320
@@ -60,7 +60,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: -213601331
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &3974081087167507728
@@ -113,6 +113,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6518848726729708194}
   - component: {fileID: 3931563700210221727}
+  - component: {fileID: 256201751747417327}
   m_Layer: 0
   m_Name: NormalAttack
   m_TagString: Untagged
@@ -180,15 +181,43 @@ PolygonCollider2D:
   m_Points:
     m_Paths:
     - - {x: -0.41395378, y: 1.8639591}
-      - {x: -0.5328574, y: 0.26833683}
-      - {x: -0.56423676, y: 0.1251188}
-      - {x: -0.5184664, y: -0.36707187}
-      - {x: -0.55755395, y: -1.602115}
-      - {x: 1.6838379, y: -1.3417709}
-      - {x: 1.7011744, y: -0.69123584}
+      - {x: -0.6529234, y: 1.7991722}
+      - {x: -0.72932637, y: 1.7460028}
+      - {x: -0.6685478, y: 0.12819839}
+      - {x: -0.58757025, y: 0.078802586}
+      - {x: 0.23984277, y: 0.015048444}
+      - {x: 1.1585517, y: -0.081082344}
+      - {x: 1.1308628, y: -0.07590085}
       - {x: 1.8980201, y: 0.39527518}
       - {x: 1.390871, y: 1.0881232}
   m_UseDelaunayMesh: 0
+--- !u!50 &256201751747417327
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1868963564698718537}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1962578575868020651
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,6 +357,7 @@ GameObject:
   - component: {fileID: 1904832529719655253}
   - component: {fileID: 6574056205859061606}
   - component: {fileID: 2307206954275919947}
+  - component: {fileID: 3379187670673390144}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -368,6 +398,9 @@ MonoBehaviour:
   frictionFactor: 2
   detectRadius: 0
   anim: {fileID: 7247124344986998861}
+  targetlayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!50 &1904832529719655253
 Rigidbody2D:
   serializedVersion: 4
@@ -407,16 +440,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7cd0d3aa205b5b478f70e627ba95b44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalAttackRange: {fileID: 3931563700210221727}
-  elementalAttackRange: {fileID: 0}
+  AttackRange: {fileID: 3931563700210221727}
   targetLayer:
     serializedVersion: 2
     m_Bits: 4294967295
-  element: 0
+  element: 1
   mana: 100
   animator: {fileID: 7247124344986998861}
   manaCostAmount: 0
   manaBar: {fileID: 3739243514280100805}
+  fireDamage: 5
 --- !u!114 &2307206954275919947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,6 +466,51 @@ MonoBehaviour:
   currentHealth: 0
   isImmune: 0
   healthSlider: {fileID: 5407106033941307639}
+--- !u!61 &3379187670673390144
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2377042294363349840}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 0.38}
+  m_EdgeRadius: 0
 --- !u!1 &3694121308822690179
 GameObject:
   m_ObjectHideFlags: 0
@@ -754,6 +832,7 @@ GameObject:
   - component: {fileID: 1339868302847741238}
   - component: {fileID: 7529659581177799183}
   - component: {fileID: 7247124344986998861}
+  - component: {fileID: 5147755459358485445}
   m_Layer: 0
   m_Name: Entity
   m_TagString: Untagged
@@ -850,6 +929,63 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5147755459358485445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7836342684543243474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d6ae18326bb224cbded5a48c355781, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lightAttackEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6574056205859061606}
+        m_TargetAssemblyTypeName: PlayerAbility, Assembly-CSharp
+        m_MethodName: NormalAttack
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  heavyAttackEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6574056205859061606}
+        m_TargetAssemblyTypeName: PlayerAbility, Assembly-CSharp
+        m_MethodName: ElementalAttack
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  endAttackEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6574056205859061606}
+        m_TargetAssemblyTypeName: PlayerAbility, Assembly-CSharp
+        m_MethodName: EndAttack
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8684255477299779556
 GameObject:
   m_ObjectHideFlags: 0

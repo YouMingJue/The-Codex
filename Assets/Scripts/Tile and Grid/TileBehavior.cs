@@ -13,7 +13,7 @@ public  class TileBehavior : MonoBehaviour
 
     [HideInInspector]public Collider2D collid;
 
-    [HideInInspector] public Vector3Int position;
+    public Vector3Int position;
 
     [SerializeField] private float convertCD = 3.2f;
     [SerializeField] private float restoreCD = 3;
@@ -111,7 +111,7 @@ public  class TileBehavior : MonoBehaviour
         Debug.Log($"[{Time.time}] Converting tile to {convertType}");
         element = convertType;
         Debug.Log($"[{Time.time}] First Element: {element}");
-        StartCoroutine(DelayedTileRefresh());
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
         Debug.Log($"[{Time.time}] Second Element: {element}");
         restoreCD = 5;
         convertCD = 3;
@@ -122,19 +122,19 @@ public  class TileBehavior : MonoBehaviour
         }
     }
 
-private void GenerateFireEffect()
-{
-    string path = "Fire FX";
-        GameObject fireEffectPrefab = Resources.Load<GameObject>(path);
-    if (fireEffectPrefab != null)
+    private void GenerateFireEffect()
     {
-        GameObject fireEffect = Instantiate(fireEffectPrefab, new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z), Quaternion.identity);
+        string path = "Fire FX";
+            GameObject fireEffectPrefab = Resources.Load<GameObject>(path);
+        if (fireEffectPrefab != null)
+        {
+            GameObject fireEffect = Instantiate(fireEffectPrefab, new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z), Quaternion.identity);
+        }
+        else
+        {
+            Debug.LogError("Fire effect prefab not found!");
+        }
     }
-    else
-    {
-        Debug.LogError("Fire effect prefab not found!");
-    }
-}
 
     private IEnumerator RestoreElement()
     {
@@ -146,12 +146,5 @@ private void GenerateFireEffect()
     public void ChangeTileSprite(Element element)
     {
         //_tile.ChangeSprite(element, position, TileManager.instance.tilemap);
-    }
-
-    private IEnumerator DelayedTileRefresh()
-    {
-        yield return new WaitForSeconds(0.01f);  // Introduce a tiny delay (10ms)
-        _tile.RefreshTile(position, TileManager.instance.tilemap);
-        Debug.Log($"[{Time.time}] Tile refreshed with element: {element}");
     }
 }

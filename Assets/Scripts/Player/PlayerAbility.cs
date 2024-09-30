@@ -6,19 +6,33 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 using UnityEngine.EventSystems;
+using System;
+using UnityEngine.Tilemaps;
+using UnityEngine.WSA;
 
+public enum Buff
+{
+    None,
+    WaterState
+}
 public class PlayerAbility : MonoBehaviour
 {
-
+    private Buff currentState = Buff.None;
     [SerializeField] private Collider2D AttackRange;
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] public Element element;
     [SerializeField] private float mana = 100;
     [SerializeField] Animator animator;
     private bool isAttacking = false;
-    public float Mana {
+    public Action<TileBehavior> onTileInteraction;
+    private Vector3Int currentTilePos;
+    TileBehavior currentTile;
+    [SerializeField] private HealthSystem health;
+    public float Mana
+    {
         get { return mana; }
-        set {
+        set
+        {
             mana = Mathf.Clamp(value, 0, 100);
             if (manaBar != null)
             {
@@ -26,40 +40,61 @@ public class PlayerAbility : MonoBehaviour
             }
         }
     }
-    
+
     [SerializeField] private float manaCostAmount;
     [SerializeField] private UnityEngine.UI.Slider manaBar;
-
-    //player properties
-    private int health;
+    [SerializeField] private float fireDamage;
 
     // Start is called before the first frame update
     void Start()
     {
         manaBar.maxValue = mana;
         manaBar.value = mana;
+        UpdateTilePos();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Check for left mouse click
-        if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking) 
+        switch (element)
         {
-            Debug.Log("move");
-            // Trigger the NormalAttack animation
+            case Element.Water:
+                // Check if the player is on a water tile and presses LeftShift
+                if (currentTile != null && currentTile.element == Element.Water && currentState == Buff.None)
+                {
+                    if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= manaCostAmount)
+                    {
+                        currentState = Buff.WaterState;
+                        health.isImmune = true;
+                        Debug.Log("Player entered WaterState.");
+                    }
+                }
+                else if (currentState == Buff.WaterState && (Input.GetKeyDown(KeyCode.LeftShift)|| Mana < manaCostAmount))
+                {
+                    currentState = Buff.None;
+                    health.isImmune = false;
+                    Debug.Log("Player exited WaterState.");
+                }
+                break;
+        }
+
+        // Check for left mouse click (light attack)
+        if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking)
+        {
+            isAttacking = true;
             animator.SetTrigger("LightAttack");
         }
 
+        // Check for E key (heavy attack)
         if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
         {
+            isAttacking = true;
             animator.SetTrigger("HeavyAttack");
         }
     }
 
     public void NormalAttack()
     {
-        isAttacking = true;
         List<Collider2D> colliders = new List<Collider2D>();
         ContactFilter2D filter = new ContactFilter2D();
         filter.SetLayerMask(targetLayer);
@@ -71,12 +106,10 @@ public class PlayerAbility : MonoBehaviour
         {
             Attack(collider, 20);
         }
-        AttackRange.enabled = false;
     }
 
-    public void ElmentalAttack()
+    public void ElementalAttack()
     {
-        isAttacking = true;
         Mana -= manaCostAmount;
         if (manaBar != null)
         {
@@ -94,12 +127,11 @@ public class PlayerAbility : MonoBehaviour
         {
             Attack(collider, 30);
             TileBehavior tile = collider.GetComponent<TileBehavior>();
-            if (tile != null) 
+            if (tile != null)
             {
                 tile.PaintTile(element);
             }
         }
-        AttackRange.enabled = false;
     }
 
     public void RestoreMana(int restoreAmount)
@@ -109,20 +141,70 @@ public class PlayerAbility : MonoBehaviour
 
     public void Attack(Collider2D collider, int damage)
     {
-        if(collider.TryGetComponent<HealthSystem>( out HealthSystem entity) && collider.transform != transform)
+        if (collider.TryGetComponent(out HealthSystem entity) && collider.transform != transform)
         {
             entity.TakeDamage(damage, transform);
         }
     }
 
-    private bool IsMouseOverUI(){
-        //return EventSystem.current.IsPointerOverGameObject();
+    private bool IsMouseOverUI()
+    {
         return false;
-    }//To detect if the cursor is over UI, don't attack
-
+    }
 
     public void EndAttack()
     {
         isAttacking = false;
+        AttackRange.enabled = false;
+    }
+
+    private void FixedUpdate()
+    {
+        BuffStateEffect(currentState);
+        UpdateTilePos();
+        TileEvent();
+    }
+
+    void BuffStateEffect(Buff buffstate)
+    {
+        switch (buffstate)
+        {
+            case Buff.WaterState:
+                Mana -= ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+                       ? manaCostAmount * 1.5f : manaCostAmount * 0.4f) * Time.fixedDeltaTime;
+                // Check if the player is standing on a water tile
+                if (currentTile == null || currentTile.element != Element.Water)
+                {
+
+                    // Trigger interaction with the current tile (even if it's not water)
+                    onTileInteraction?.Invoke(currentTile);
+                }
+                break;
+        }
+    }
+
+    void UpdateTilePos()
+    {
+
+        // Convert world position to tilemap cell position
+        Vector3Int cellPosition = TileManager.instance.tilemap.WorldToCell(transform.position);
+
+        // If the player has moved to a new cell, update the current tile
+        if (cellPosition != currentTilePos)
+        {
+            currentTilePos = cellPosition;
+            currentTile = TileManager.instance.tilemap.GetInstantiatedObject(cellPosition)?.GetComponent<TileBehavior>();
+        }
+    }
+
+    void TileEvent()
+    {
+        switch (currentTile?.element) 
+        {
+            case Element.Fire:
+                if (element == Element.Fire) return;
+                GetComponent<HealthSystem>().TakeDamage(fireDamage * Time.fixedDeltaTime, transform);
+                break;
+        }
     }
 }

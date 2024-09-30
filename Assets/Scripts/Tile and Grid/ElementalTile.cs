@@ -39,7 +39,7 @@ public class ElementalTile : Tile
     {
         base.GetTileData(position, tilemap, ref tileData);
         var _tilemap = tilemap.GetComponent<Tilemap>();
-        TileBehavior behavior = TileManager.instance?.tiles.FirstOrDefault((t) => t.position == position);
+        TileBehavior behavior = _tilemap.GetInstantiatedObject(position)?.GetComponent<TileBehavior>();
         if(behavior != null) UpdateColor(behavior.element,ref tileData);
         Debug.Log(tileData.color);
     }
@@ -54,7 +54,7 @@ public class ElementalTile : Tile
     }
 
     private void UpdateColor(Element element ,ref UnityEngine.Tilemaps.TileData tileData)
-    {
+    {                     
         Debug.Log($"[{Time.time}] Updating color for element: {element}");
         switch (element)
         {

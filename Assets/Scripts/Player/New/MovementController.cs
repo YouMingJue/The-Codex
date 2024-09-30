@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using Steamworks;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class PlayerController : MonoBehaviour
     [Range(1,5)]
     [SerializeField] private float frictionFactor;
     private Vector2 velocity;
-    private CircleCollider2D circleCollider;
+    private Collider2D collid;
 
     private SpriteRenderer sprite;
 
@@ -20,11 +22,18 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private Animator anim;
 
+    [SerializeField] private LayerMask targetlayer;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        circleCollider = GetComponent<CircleCollider2D>();
+        collid = GetComponent<Collider2D>();
         sprite = anim.GetComponent<SpriteRenderer>();
+    }
+
+    private void Start()
+    {
+        GetComponent<PlayerAbility>().onTileInteraction += DiveTile;
     }
 
     private void Update()
@@ -50,11 +59,21 @@ public class PlayerController : MonoBehaviour
         anim.SetFloat("Velocity", Mathf.Abs(velocity.magnitude));
     }
 
-    void FlipHorizontally(float inputX)
+    void FlipHorizontally(float inputX)                                                                                                             
     {
         Vector3 newScale = anim.transform.localScale;
         newScale.x = Mathf.Abs(newScale.x) * Mathf.Sign(inputX);
         anim.transform.localScale = newScale;
     }
+
+    void DiveTile(TileBehavior tile)
+    {
+        if (tile == null || tile.element != Element.Water)
+        {
+           transform.position -= (Vector3)velocity * Time.fixedDeltaTime * 3f;
+            velocity = Vector2.zero;
+        }else velocity *= 1.2f;
+    }
+
 }
 

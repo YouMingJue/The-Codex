@@ -13,7 +13,7 @@ public class HealthSystem : MonoBehaviour
     public Slider healthSlider;
 
     // Event for when the player dies
-    public event Action OnPlayerDeath;
+    public event Action OnDeath;
     public event Action<float, Transform> OnDamage;
 
     // Start is called before the first frame update
@@ -55,7 +55,7 @@ public class HealthSystem : MonoBehaviour
     private void PlayerDeath()
     {
         Debug.Log("Player has died!");
-        OnPlayerDeath?.Invoke(); // Trigger death event
+        OnDeath?.Invoke(); // Trigger death event
     }
 
     // Method to heal the player (if needed)

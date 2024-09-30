@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   element: 3
   radiateRange: 5
+  radiateCD: 0
 --- !u!61 &8318933447360366254
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -107,7 +108,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7860707091060539478}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:

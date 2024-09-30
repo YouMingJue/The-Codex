@@ -16,7 +16,7 @@ public class ElementalTower : MonoBehaviour
     private void Start()
     {
         healthSystem.OnDamage += OnGetHit;
-        healthSystem.OnPlayerDeath += OnGetDestroyed;
+        healthSystem.OnDeath += OnGetDestroyed;
     }
 
     private void OnGetHit(float damage, Transform attacker)

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1141037164821108849}
   - component: {fileID: 5972707904119360183}
   - component: {fileID: 8996023251640092000}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -84,12 +84,12 @@ PolygonCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.26}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 0.59776455}
-    newSize: {x: 1, y: 0.59776455}
+    oldSize: {x: 0.9491525, y: 1.0625088}
+    newSize: {x: 0.9491525, y: 1.0625088}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
