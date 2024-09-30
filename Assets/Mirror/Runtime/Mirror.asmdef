@@ -1,16 +1,16 @@
 {
     "name": "Mirror",
-    "rootNamespace": "",
     "references": [
-        "GUID:325984b52e4128546bc7558552f8b1d2"
+        "Mirror.CompilerSymbols",
+        "Telepathy",
+        "kcp2k"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "defineConstraints": []
 }

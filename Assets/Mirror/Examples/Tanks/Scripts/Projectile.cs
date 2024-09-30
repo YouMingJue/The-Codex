@@ -4,9 +4,9 @@ namespace Mirror.Examples.Tanks
 {
     public class Projectile : NetworkBehaviour
     {
-        public float destroyAfter = 2f;
+        public float destroyAfter = 5;
         public Rigidbody rigidBody;
-        public float force = 1000f;
+        public float force = 1000;
 
         public override void OnStartServer()
         {
@@ -27,20 +27,12 @@ namespace Mirror.Examples.Tanks
             NetworkServer.Destroy(gameObject);
         }
 
-        // ServerCallback because we don't want a warning
-        // if OnTriggerEnter is called on the client
+        // ServerCallback because we don't want a warning if OnTriggerEnter is
+        // called on the client
         [ServerCallback]
-        void OnTriggerEnter(Collider other)
+        void OnTriggerEnter(Collider co)
         {
-            Debug.Log("Hit: " + other.name);
-            if (other.transform.parent.TryGetComponent(out Tank tank))
-            {
-                --tank.health;
-                if (tank.health == 0)
-                    NetworkServer.RemovePlayerForConnection(tank.netIdentity.connectionToClient, RemovePlayerOptions.Destroy);
-
-                DestroySelf();
-            }
+            NetworkServer.Destroy(gameObject);
         }
     }
 }

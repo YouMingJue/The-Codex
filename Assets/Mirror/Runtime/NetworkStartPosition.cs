@@ -4,7 +4,7 @@ namespace Mirror
 {
     /// <summary>Start position for player spawning, automatically registers itself in the NetworkManager.</summary>
     [DisallowMultipleComponent]
-    [AddComponentMenu("Network/Network Start Position")]
+    [AddComponentMenu("Network/NetworkStartPosition")]
     [HelpURL("https://mirror-networking.gitbook.io/docs/components/network-start-position")]
     public class NetworkStartPosition : MonoBehaviour
     {

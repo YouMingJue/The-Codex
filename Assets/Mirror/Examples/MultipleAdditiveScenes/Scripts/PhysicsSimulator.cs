@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
-namespace Mirror.Examples.Common
+namespace Mirror.Examples.MultipleAdditiveScenes
 {
-    [AddComponentMenu("")]
     public class PhysicsSimulator : MonoBehaviour
     {
         PhysicsScene physicsScene;
@@ -27,9 +26,10 @@ namespace Mirror.Examples.Common
             }
         }
 
-        [ServerCallback]
         void FixedUpdate()
         {
+            if (!NetworkServer.active) return;
+
             if (simulatePhysicsScene)
                 physicsScene.Simulate(Time.fixedDeltaTime);
 

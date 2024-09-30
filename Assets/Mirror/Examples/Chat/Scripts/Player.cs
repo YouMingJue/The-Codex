@@ -1,3 +1,6 @@
+using System;
+using UnityEngine;
+
 namespace Mirror.Examples.Chat
 {
     public class Player : NetworkBehaviour
@@ -5,14 +8,19 @@ namespace Mirror.Examples.Chat
         [SyncVar]
         public string playerName;
 
-        public override void OnStartServer()
+        public static event Action<Player, string> OnMessage;
+
+        [Command]
+        public void CmdSend(string message)
         {
-            playerName = (string)connectionToClient.authenticationData;
+            if (message.Trim() != "")
+                RpcReceive(message.Trim());
         }
 
-        public override void OnStartLocalPlayer()
+        [ClientRpc]
+        public void RpcReceive(string message)
         {
-            ChatUI.localPlayerName = playerName;
+            OnMessage?.Invoke(this, message);
         }
     }
 }
