@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEngine.Tilemaps;
 using System.Linq;
+using Mirror;
 
 [ExecuteInEditMode] // This attribute allows the script to run in the editor
 public class TileManager : MonoBehaviour
@@ -23,6 +24,18 @@ public class TileManager : MonoBehaviour
         {
             // If another instance exists, destroy this one
             Destroy(gameObject);
+        }
+    }
+
+    private void Start()
+    {
+        foreach (TileBehavior tile in tiles)
+        {
+            GameObject go = tile.gameObject;
+            if (go != null && go.GetComponent<NetworkIdentity>() == null)
+            {
+                go.AddComponent<NetworkIdentity>();
+            }
         }
     }
 

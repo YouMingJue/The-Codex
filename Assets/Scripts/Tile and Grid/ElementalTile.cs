@@ -20,6 +20,7 @@ public class ElementalTile : Tile
 {
     [SerializeField] ElementSprite[] sprites;
     public delegate void TileRefreshEvent(ref UnityEngine.Tilemaps.TileData tileData);
+    [NonSerialized]
     public TileRefreshEvent onTileUpdateEvent;
     public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
     {

@@ -1,71 +1,85 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine;
+using Unity.VisualScripting;
 using Mirror;
 
 public class TileBehavior : NetworkBehaviour
 {
+    [SyncVar]
     public Element element;
+    [SyncVar]
     public Element originalElement;
     public ElementalTile _tile;
 
-    [HideInInspector] public Collider2D collid;
+    [HideInInspector]
+    public Collider2D collid;
 
     public Vector3Int position;
 
-    [SerializeField] private float convertCD = 3.2f;
-    [SerializeField] private float restoreCD = 3;
+    [SerializeField]
+    private float convertCD = 3.2f;
+    [SerializeField]
+    private float restoreCD = 3;
 
     private List<TileBehavior> neighboringTiles;
 
-    // SyncVar to sync the element type across the network
-    [SyncVar(hook = nameof(OnElementChanged))]
-    public Element syncElement;
+    public void Init(ElementalTile tile, Vector3Int cellPos)
+    {
+        if (isServer)
+        {
+            CmdInit(tile, cellPos);
+        }
+    }
 
     private void Start()
     {
-        Init(_tile, position);
-    }
-
-    // Call this method to initialize the tile behavior
-    public void Init(ElementalTile tile, Vector3Int cellPos)
-    {
-        _tile = tile;
-        position = cellPos;
-        originalElement = element;
-        syncElement = element; // Set the initial element
-        neighboringTiles = TileManager.instance.GetSurroundingTiles(position);
         if (isServer)
         {
             TileManager.instance.tiles.Add(this);
-        }
-        else
-        {
-            InitializeTile();
+            neighboringTiles = TileManager.instance.GetSurroundingTiles(position);
+            // 这里如果需要在服务器启动时初始化特定tile，可以调用Init方法或者直接使用CmdInit
+            // 假设这里有一个默认的初始化需求
+            ElementalTile defaultTile = null; // 这里需要根据实际情况赋值
+            Vector3Int defaultPos = new Vector3Int(0, 0, 0); // 这里需要根据实际情况赋值
+            Init(defaultTile, defaultPos);
         }
     }
 
-    private void InitializeTile()
+
+    [Command]
+    public void CmdInit(ElementalTile tile, Vector3Int cellPos)
     {
-        // Set the initial element and tile visual
-        element = syncElement;
-        _tile.RefreshTile(position, TileManager.instance.tilemap);
+        _tile = tile;
+        position = cellPos;
+        RpcInitOnClients(tile, cellPos);
+    }
+
+    [ClientRpc]
+    private void RpcInitOnClients(ElementalTile tile, Vector3Int cellPos)
+    {
+        _tile = tile;
+        position = cellPos;
     }
 
     private void Update()
     {
-        if (isServer)
+        if (element != originalElement)
         {
-            // Server side logic for converting tiles
             restoreCD -= Time.deltaTime;
-            if (element != originalElement && restoreCD < 0)
+            if (restoreCD < 0)
             {
                 restoreCD = 3;
-                ConvertTile(originalElement);
-                StartCoroutine(RestoreElement());
+                if (isServer)
+                {
+                    CmdRestoreElement();
+                }
             }
+        }
+        if (neighboringTiles != null)
+        {
             foreach (TileBehavior neighboringTile in neighboringTiles)
             {
                 if (IsGeneration(neighboringTile.element))
@@ -73,13 +87,39 @@ public class TileBehavior : NetworkBehaviour
                     convertCD -= Time.deltaTime;
                     if (convertCD < 0)
                     {
-                        ConvertTile(neighboringTile.element);
-                        convertCD = 3.2f;
+                        if (isServer)
+                        {
+                            CmdConvertTile(neighboringTile.element);
+                        }
                     }
                     break;
                 }
             }
         }
+    }
+
+    [Command]
+    public void CmdConvertTile(Element convertType)
+    {
+        Debug.Log($"[{Time.time}] Converting tile to {convertType} on server");
+        element = convertType;
+        Debug.Log($"[{Time.time}] First Element: {element} on server");
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
+        Debug.Log($"[{Time.time}] Second Element: {element} on server");
+        restoreCD = 5;
+        convertCD = 3;
+
+        if (convertType == Element.Fire)
+        {
+            //GenerateFireEffect();
+        }
+        RpcUpdateTileOnClients();
+    }
+
+    [ClientRpc]
+    private void RpcUpdateTileOnClients()
+    {
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
     }
 
     public bool IsGeneration(Element otherType)
@@ -120,55 +160,56 @@ public class TileBehavior : NetworkBehaviour
 
     public void PaintTile(Element paintType)
     {
-        if (!IsOvercoming(paintType) && isServer)
+        if (!IsOvercoming(paintType))
         {
-            ConvertTile(paintType);
+            if (isServer)
+            {
+                CmdConvertTile(paintType);
+            }
+            else
+            {
+                CmdRequestTileConversion(paintType);
+            }
         }
     }
 
-    public void ConvertTile(Element convertType)
+    [Command]
+    private void CmdRequestTileConversion(Element paintType)
     {
-        if (isServer)
+        CmdConvertTile(paintType);
+    }
+
+
+    [Command]
+    private void CmdRestoreElement()
+    {
+        if (element != originalElement)
         {
-            element = convertType;
-            _tile.RefreshTile(position, TileManager.instance.tilemap);
-            restoreCD = 5;
-            convertCD = 3.2f;
-            RpcConvertTile(convertType);
+            CmdConvertTile(originalElement);
         }
+        RpcRestoreElementOnClients();
     }
 
     [ClientRpc]
-    public void RpcConvertTile(Element newElement)
+    private void RpcRestoreElementOnClients()
     {
-        if (!isLocalPlayer) return;
-
-        // Update the local client's view
-        syncElement = newElement;
-        _tile.RefreshTile(position, TileManager.instance.tilemap);
-    }
-
-    private void OnElementChanged(Element oldElement, Element newElement)
-    {
-        if (!isServer) return;
-
-        // Handle the element change on the server
-        element = newElement;
-        _tile.RefreshTile(position, TileManager.instance.tilemap);
+        if (element != originalElement)
+        {
+            RpcUpdateTileOnClients();
+        }
     }
 
     private IEnumerator RestoreElement()
     {
-        yield return new WaitForSeconds(0.4f);
-        if (element != originalElement)
+        yield return new WaitForSeconds(.4f);
+        if (isServer)
         {
-            ConvertTile(originalElement);
+            CmdRestoreElement();
         }
     }
 
     public void ChangeTileSprite(Element element)
     {
-        // Update the tile's sprite based on the element
-        // _tile.ChangeSprite(element, position, TileManager.instance.tilemap);
+        //_tile.ChangeSprite(element, position, TileManager.instance.tilemap);
     }
 }
