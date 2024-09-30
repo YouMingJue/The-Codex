@@ -84,7 +84,7 @@ public class PlayerController : MonoBehaviour
         {
            transform.position -= (Vector3)velocity * Time.fixedDeltaTime * 3f;
             velocity = Vector2.zero;
-        }else velocity *= 1.2f;
+        }else velocity *= 200f;
     }
 
 }

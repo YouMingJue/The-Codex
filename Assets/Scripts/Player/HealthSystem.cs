@@ -10,7 +10,7 @@ public class HealthSystem : MonoBehaviour
     public bool isImmune = false;
 
     // Reference to the UI Slider for health
-    public Slider healthSlider;
+    public Slider healthSlider; 
 
     // Event for when the player dies
     public event Action OnDeath;

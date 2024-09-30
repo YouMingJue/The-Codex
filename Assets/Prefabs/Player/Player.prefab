@@ -447,11 +447,11 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 4294967295
-  element: 1
+  element: 2
   mana: 100
   animator: {fileID: 7247124344986998861}
   health: {fileID: 2307206954275919947}
-  manaCostAmount: 0
+  manaCostAmount: 10
   manaBar: {fileID: 3739243514280100805}
   fireDamage: 5
 --- !u!114 &2307206954275919947
