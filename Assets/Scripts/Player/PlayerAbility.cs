@@ -57,6 +57,7 @@ public class PlayerAbility : MonoBehaviour
         UpdateTilePos();
 
         playerObjectController = GetComponent<PlayerObjectController>();
+        health.OnDeath += ResetPlayer; 
     }
 
     // Update is called once per frame
@@ -217,5 +218,10 @@ public class PlayerAbility : MonoBehaviour
                 GetComponent<HealthSystem>().TakeDamage(fireDamage * Time.fixedDeltaTime, transform);
                 break;
         }
+    }
+
+    void ResetPlayer()
+    {
+        Mana = 100;
     }
 }

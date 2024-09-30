@@ -60,6 +60,7 @@ public class HealthSystem : MonoBehaviour
     {
         Debug.Log("Player has died!");
         GameplayManager.Instance.AddScoreToOppositeTeam(playerObjectController.playerTeam);
+        ResetHealath();
         OnDeath?.Invoke(); // Trigger death event
     }
 
@@ -74,6 +75,16 @@ public class HealthSystem : MonoBehaviour
         if (healthSlider != null)
         {
             healthSlider.value = (float)currentHealth;
+        }
+    }
+
+    void ResetHealath()
+    {
+        currentHealth = maxHealth;
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
         }
     }
 }

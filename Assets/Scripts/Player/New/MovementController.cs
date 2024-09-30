@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
         GetComponent<PlayerAbility>().onTileInteraction += DiveTile;
 
         playerObjectController = GetComponent<PlayerObjectController>();
+        GetComponent<HealthSystem>().OnDeath += SetPosition;
     }
 
     private void Update()
@@ -71,6 +72,12 @@ public class PlayerController : MonoBehaviour
         anim.transform.localScale = newScale;
     }
 
+
+    public void SetPosition()
+    {
+        Vector3 position = TileManager.instance.GetPlayerStartPosition();
+        transform.position = new Vector3(position.x, position.y, 0f);
+    }
     void DiveTile(TileBehavior tile)
     {
         if (tile == null || tile.element != Element.Water)
