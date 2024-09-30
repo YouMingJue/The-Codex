@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using JetBrains.Annotations;
 using System.Xml.Linq;
 using System.Linq;
+using Mirror;
 
 [Serializable]
 public class ElementSprite
@@ -22,15 +23,22 @@ public class ElementalTile : Tile
     public delegate void TileRefreshEvent(ref UnityEngine.Tilemaps.TileData tileData);
     [NonSerialized]
     public TileRefreshEvent onTileUpdateEvent;
+
     public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
     {
         if (go != null)
         {
             TileBehavior tileObject = go.GetComponent<TileBehavior>();
             tileObject.Init(this, position);
+
+            if (!go.GetComponent<NetworkIdentity>())
+            {
+                go.AddComponent<NetworkIdentity>();
+            }
         }
         return base.StartUp(position, tilemap, go);
     }
+
     public override void RefreshTile(Vector3Int position, ITilemap tilemap)
     {
         base.RefreshTile(position, tilemap);
@@ -41,21 +49,21 @@ public class ElementalTile : Tile
         base.GetTileData(position, tilemap, ref tileData);
         var _tilemap = tilemap.GetComponent<Tilemap>();
         TileBehavior behavior = _tilemap.GetInstantiatedObject(position)?.GetComponent<TileBehavior>();
-        if(behavior != null) UpdateColor(behavior.element,ref tileData);
+        if (behavior != null) UpdateColor(behavior.element, ref tileData);
         Debug.Log(tileData.color);
     }
 
-    public void ChangeSprite(Element element,Vector3Int position, ITilemap tilemap) 
+    public void ChangeSprite(Element element, Vector3Int position, ITilemap tilemap)
     {
-        foreach (ElementSprite elementSprite in sprites) 
-        { 
-            if(elementSprite.element == element) sprite = elementSprite.sprite;
+        foreach (ElementSprite elementSprite in sprites)
+        {
+            if (elementSprite.element == element) sprite = elementSprite.sprite;
         }
         //RefreshTile(position, tilemap);
     }
 
-    private void UpdateColor(Element element ,ref UnityEngine.Tilemaps.TileData tileData)
-    {                     
+    private void UpdateColor(Element element, ref UnityEngine.Tilemaps.TileData tileData)
+    {
         Debug.Log($"[{Time.time}] Updating color for element: {element}");
         switch (element)
         {

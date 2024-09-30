@@ -27,18 +27,6 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        foreach (TileBehavior tile in tiles)
-        {
-            GameObject go = tile.gameObject;
-            if (go != null && go.GetComponent<NetworkIdentity>() == null)
-            {
-                go.AddComponent<NetworkIdentity>();
-            }
-        }
-    }
-
     public Vector3 GetPlayerStartPosition()
     {
         return new Vector3(playerStartPosition.x, playerStartPosition.y, 0);
