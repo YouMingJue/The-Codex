@@ -1,17 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.Tilemaps;
 using UnityEngine;
-using Unity.VisualScripting;
+using UnityEngine.Tilemaps;
+using Mirror;
 
-public  class TileBehavior : MonoBehaviour
+public class TileBehavior : NetworkBehaviour
 {
     public Element element;
     public Element originalElement;
     public ElementalTile _tile;
 
-    [HideInInspector]public Collider2D collid;
+    [HideInInspector] public Collider2D collid;
 
     public Vector3Int position;
 
@@ -20,45 +20,65 @@ public  class TileBehavior : MonoBehaviour
 
     private List<TileBehavior> neighboringTiles;
 
+    // SyncVar to sync the element type across the network
+    [SyncVar(hook = nameof(OnElementChanged))]
+    public Element syncElement;
+
     private void Start()
     {
-        TileManager.instance.tiles.Add(this);
-        neighboringTiles = TileManager.instance.GetSurroundingTiles(position);
+        Init(_tile, position);
     }
 
-
-     public void Init(ElementalTile tile, Vector3Int cellPos)
-     {
+    // Call this method to initialize the tile behavior
+    public void Init(ElementalTile tile, Vector3Int cellPos)
+    {
         _tile = tile;
         position = cellPos;
+        originalElement = element;
+        syncElement = element; // Set the initial element
+        neighboringTiles = TileManager.instance.GetSurroundingTiles(position);
+        if (isServer)
+        {
+            TileManager.instance.tiles.Add(this);
+        }
+        else
+        {
+            InitializeTile();
+        }
+    }
 
-     }
+    private void InitializeTile()
+    {
+        // Set the initial element and tile visual
+        element = syncElement;
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
+    }
 
     private void Update()
     {
-        if (element != originalElement)
+        if (isServer)
         {
+            // Server side logic for converting tiles
             restoreCD -= Time.deltaTime;
-            if (restoreCD < 0) 
+            if (element != originalElement && restoreCD < 0)
             {
                 restoreCD = 3;
                 ConvertTile(originalElement);
                 StartCoroutine(RestoreElement());
-            } 
-        }
-        foreach (TileBehavior neighboringTile in neighboringTiles)
-        {
-            if (IsGeneration(neighboringTile.element))
-            {
-
-                convertCD  -= Time.deltaTime;
-                if (convertCD < 0)
-                {
-                    ConvertTile(neighboringTile.element);
-                }
-                break;
             }
-   
+            foreach (TileBehavior neighboringTile in neighboringTiles)
+            {
+                if (IsGeneration(neighboringTile.element))
+                {
+                    convertCD -= Time.deltaTime;
+                    if (convertCD < 0)
+                    {
+                        ConvertTile(neighboringTile.element);
+                        convertCD = 3.2f;
+                    }
+                    break;
+                }
+            }
         }
     }
 
@@ -100,7 +120,7 @@ public  class TileBehavior : MonoBehaviour
 
     public void PaintTile(Element paintType)
     {
-        if (!IsOvercoming(paintType))
+        if (!IsOvercoming(paintType) && isServer)
         {
             ConvertTile(paintType);
         }
@@ -108,43 +128,47 @@ public  class TileBehavior : MonoBehaviour
 
     public void ConvertTile(Element convertType)
     {
-        Debug.Log($"[{Time.time}] Converting tile to {convertType}");
-        element = convertType;
-        Debug.Log($"[{Time.time}] First Element: {element}");
-        _tile.RefreshTile(position, TileManager.instance.tilemap);
-        Debug.Log($"[{Time.time}] Second Element: {element}");
-        restoreCD = 5;
-        convertCD = 3;
-
-        if (convertType == Element.Fire)
+        if (isServer)
         {
-            //GenerateFireEffect();
+            element = convertType;
+            _tile.RefreshTile(position, TileManager.instance.tilemap);
+            restoreCD = 5;
+            convertCD = 3.2f;
+            RpcConvertTile(convertType);
         }
     }
 
-    private void GenerateFireEffect()
+    [ClientRpc]
+    public void RpcConvertTile(Element newElement)
     {
-        string path = "Fire FX";
-            GameObject fireEffectPrefab = Resources.Load<GameObject>(path);
-        if (fireEffectPrefab != null)
-        {
-            GameObject fireEffect = Instantiate(fireEffectPrefab, new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z), Quaternion.identity);
-        }
-        else
-        {
-            Debug.LogError("Fire effect prefab not found!");
-        }
+        if (!isLocalPlayer) return;
+
+        // Update the local client's view
+        syncElement = newElement;
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
+    }
+
+    private void OnElementChanged(Element oldElement, Element newElement)
+    {
+        if (!isServer) return;
+
+        // Handle the element change on the server
+        element = newElement;
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
     }
 
     private IEnumerator RestoreElement()
     {
-        yield return new WaitForSeconds(.4f);
-        if(element != originalElement) ConvertTile(originalElement);
-
+        yield return new WaitForSeconds(0.4f);
+        if (element != originalElement)
+        {
+            ConvertTile(originalElement);
+        }
     }
 
     public void ChangeTileSprite(Element element)
     {
-        //_tile.ChangeSprite(element, position, TileManager.instance.tilemap);
+        // Update the tile's sprite based on the element
+        // _tile.ChangeSprite(element, position, TileManager.instance.tilemap);
     }
 }

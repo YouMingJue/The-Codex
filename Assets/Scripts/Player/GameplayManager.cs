@@ -12,15 +12,14 @@ public class GameplayManager : NetworkBehaviour
     [SyncVar(hook = nameof(OnTeamBScoreChanged))]
     public int teamBScore = 0;
 
-    public TMP_Text teamAScoreText; // 修改类型为 TMP_Text
-    public TMP_Text teamBScoreText; // 修改类型为 TMP_Text
+    public TMP_Text teamAScoreText;
+    public TMP_Text teamBScoreText;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            // 确保在场景切换时不销毁该对象
             DontDestroyOnLoad(this.gameObject);
         }
         else
