@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Steamworks;
+using Mirror;
 
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     Rigidbody2D rb;
     [SerializeField] private float moveSpeed;
@@ -72,6 +73,26 @@ public class PlayerController : MonoBehaviour
         anim.transform.localScale = newScale;
     }
 
+    public void FlipPlayerHorizontally(float inputX)
+    {
+        if (isServer)
+        {
+            CmdFlipPlayerHorizontally(inputX);
+        }
+    }
+
+    [Command]
+    private void CmdFlipPlayerHorizontally(float inputX)
+    {
+        FlipHorizontally(inputX);
+        RpcFlipPlayerHorizontallyOnClients(inputX);
+    }
+
+    [ClientRpc]
+    private void RpcFlipPlayerHorizontallyOnClients(float inputX)
+    {
+        FlipHorizontally(inputX);
+    }
 
     public void SetPosition()
     {
