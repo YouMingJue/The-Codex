@@ -16,6 +16,8 @@ public class HealthSystem : MonoBehaviour
     public event Action OnDeath;
     public event Action<float, Transform> OnDamage;
 
+    public PlayerObjectController playerObjectController;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,6 +29,8 @@ public class HealthSystem : MonoBehaviour
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth;
         }
+
+        playerObjectController = GetComponent<PlayerObjectController>();
     }
 
     // Method to handle when the player takes damage
@@ -55,6 +59,7 @@ public class HealthSystem : MonoBehaviour
     private void PlayerDeath()
     {
         Debug.Log("Player has died!");
+        GameplayManager.Instance.AddScoreToOppositeTeam(playerObjectController.playerTeam);
         OnDeath?.Invoke(); // Trigger death event
     }
 

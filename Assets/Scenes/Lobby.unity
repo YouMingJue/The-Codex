@@ -2968,7 +2968,7 @@ MonoBehaviour:
   LocalplayerController: {fileID: 0}
   StartGameButton: {fileID: 915281285}
   ReadyButtonText: {fileID: 835399702}
-  GameScene: Game
+  GameScene: Playground
   countdownDuration: 5
 --- !u!4 &2061996876
 Transform:

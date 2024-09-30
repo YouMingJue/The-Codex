@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 using System;
 using UnityEngine.Tilemaps;
 using UnityEngine.WSA;
+using UnityEngine.SceneManagement;
 
 public enum Buff
 {
@@ -28,6 +29,9 @@ public class PlayerAbility : MonoBehaviour
     private Vector3Int currentTilePos;
     TileBehavior currentTile;
     [SerializeField] private HealthSystem health;
+
+    private PlayerObjectController playerObjectController;
+
     public float Mana
     {
         get { return mana; }
@@ -51,45 +55,50 @@ public class PlayerAbility : MonoBehaviour
         manaBar.maxValue = mana;
         manaBar.value = mana;
         UpdateTilePos();
+
+        playerObjectController = GetComponent<PlayerObjectController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        switch (element)
+        if (playerObjectController.hasAuthority)
         {
-            case Element.Water:
-                // Check if the player is on a water tile and presses LeftShift
-                if (currentTile != null && currentTile.element == Element.Water && currentState == Buff.None)
-                {
-                    if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= manaCostAmount)
+            switch (element)
+            {
+                case Element.Water:
+                    // Check if the player is on a water tile and presses LeftShift
+                    if (currentTile != null && currentTile.element == Element.Water && currentState == Buff.None)
                     {
-                        currentState = Buff.WaterState;
-                        health.isImmune = true;
-                        Debug.Log("Player entered WaterState.");
+                        if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= manaCostAmount)
+                        {
+                            currentState = Buff.WaterState;
+                            health.isImmune = true;
+                            Debug.Log("Player entered WaterState.");
+                        }
                     }
-                }
-                else if (currentState == Buff.WaterState && (Input.GetKeyDown(KeyCode.LeftShift)|| Mana < manaCostAmount))
-                {
-                    currentState = Buff.None;
-                    health.isImmune = false;
-                    Debug.Log("Player exited WaterState.");
-                }
-                break;
-        }
+                    else if (currentState == Buff.WaterState && (Input.GetKeyDown(KeyCode.LeftShift) || Mana < manaCostAmount))
+                    {
+                        currentState = Buff.None;
+                        health.isImmune = false;
+                        Debug.Log("Player exited WaterState.");
+                    }
+                    break;
+            }
 
-        // Check for left mouse click (light attack)
-        if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking)
-        {
-            isAttacking = true;
-            animator.SetTrigger("LightAttack");
-        }
+            // Check for left mouse click (light attack)
+            if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking)
+            {
+                isAttacking = true;
+                animator.SetTrigger("LightAttack");
+            }
 
-        // Check for E key (heavy attack)
-        if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
-        {
-            isAttacking = true;
-            animator.SetTrigger("HeavyAttack");
+            // Check for E key (heavy attack)
+            if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
+            {
+                isAttacking = true;
+                animator.SetTrigger("HeavyAttack");
+            }
         }
     }
 
@@ -185,15 +194,17 @@ public class PlayerAbility : MonoBehaviour
 
     void UpdateTilePos()
     {
-
-        // Convert world position to tilemap cell position
-        Vector3Int cellPosition = TileManager.instance.tilemap.WorldToCell(transform.position);
-
-        // If the player has moved to a new cell, update the current tile
-        if (cellPosition != currentTilePos)
+        if (SceneManager.GetActiveScene().name == "Playground")
         {
-            currentTilePos = cellPosition;
-            currentTile = TileManager.instance.tilemap.GetInstantiatedObject(cellPosition)?.GetComponent<TileBehavior>();
+            // Convert world position to tilemap cell position
+            Vector3Int cellPosition = TileManager.instance.tilemap.WorldToCell(transform.position);
+
+            // If the player has moved to a new cell, update the current tile
+            if (cellPosition != currentTilePos)
+            {
+                currentTilePos = cellPosition;
+                currentTile = TileManager.instance.tilemap.GetInstantiatedObject(cellPosition)?.GetComponent<TileBehavior>();
+            }
         }
     }
 

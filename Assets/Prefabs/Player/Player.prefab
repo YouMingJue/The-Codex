@@ -358,9 +358,13 @@ GameObject:
   - component: {fileID: 6574056205859061606}
   - component: {fileID: 2307206954275919947}
   - component: {fileID: 3379187670673390144}
+  - component: {fileID: 259556187923473528}
+  - component: {fileID: 5705283258010073036}
+  - component: {fileID: 2276316778103039647}
+  - component: {fileID: -8820290086086066913}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -447,6 +451,7 @@ MonoBehaviour:
   element: 1
   mana: 100
   animator: {fileID: 7247124344986998861}
+  health: {fileID: 0}
   manaCostAmount: 0
   manaBar: {fileID: 3739243514280100805}
   fireDamage: 5
@@ -511,6 +516,80 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 0.38}
   m_EdgeRadius: 0
+--- !u!114 &259556187923473528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2377042294363349840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  visible: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &5705283258010073036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2377042294363349840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 585ea34dced08b848a30d4c1b6e2c64a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  ConnectionID: 0
+  PlayerIdNumber: 0
+  PlayerSteamID: 0
+  PlayerName: 
+  Ready: 0
+  playerTeam: 0
+--- !u!114 &2276316778103039647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2377042294363349840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8d91dcff690e54fba132f9c3575755, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerObjectController: {fileID: 0}
+  spriteRenderer: {fileID: 7529659581177799183}
+--- !u!114 &-8820290086086066913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2377042294363349840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  compressRotation: 0
+  interpolateScale: 1
+  interpolateRotation: 1
+  interpolatePosition: 1
+  syncScale: 1
 --- !u!1 &3694121308822690179
 GameObject:
   m_ObjectHideFlags: 0

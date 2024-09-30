@@ -24,6 +24,8 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private LayerMask targetlayer;
 
+    private PlayerObjectController playerObjectController;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -34,11 +36,14 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         GetComponent<PlayerAbility>().onTileInteraction += DiveTile;
+
+        playerObjectController = GetComponent<PlayerObjectController>();
     }
 
     private void Update()
     {
-        Movement();
+        if (playerObjectController.hasAuthority)
+            Movement();
     }
 
     void FixedUpdate()
