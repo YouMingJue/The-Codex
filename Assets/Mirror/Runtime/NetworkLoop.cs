@@ -1,4 +1,4 @@
-﻿// our ideal update looks like this:
+// our ideal update looks like this:
 //   transport.process_incoming()
 //   update_world()
 //   transport.process_outgoing()
@@ -26,24 +26,27 @@
 //      to the beginning of PostLateUpdate doesn't actually work.
 using System;
 using UnityEngine;
-
-// PlayerLoop and LowLevel were in the Experimental namespace until 2019.3
-// https://docs.unity3d.com/2019.2/Documentation/ScriptReference/Experimental.LowLevel.PlayerLoop.html
-// https://docs.unity3d.com/2019.3/Documentation/ScriptReference/LowLevel.PlayerLoop.html
-#if UNITY_2019_3_OR_NEWER
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
-#else
-using UnityEngine.Experimental.LowLevel;
-using UnityEngine.Experimental.PlayerLoop;
-#endif
 
 namespace Mirror
 {
-    internal static class NetworkLoop
+    public static class NetworkLoop
     {
         // helper enum to add loop to begin/end of subSystemList
         internal enum AddMode { Beginning, End }
+
+        // callbacks for others to hook into if they need Early/LateUpdate.
+        public static Action OnEarlyUpdate;
+        public static Action OnLateUpdate;
+
+        // RuntimeInitializeOnLoadMethod -> fast playmode without domain reload
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void ResetStatics()
+        {
+            OnEarlyUpdate = null;
+            OnLateUpdate = null;
+        }
 
         // helper function to find an update function's index in a player loop
         // type. this is used for testing to guarantee our functions are added
@@ -57,7 +60,7 @@ namespace Mirror
             // recursively keep looking
             if (playerLoop.subSystemList != null)
             {
-                for(int i = 0; i < playerLoop.subSystemList.Length; ++i)
+                for (int i = 0; i < playerLoop.subSystemList.Length; ++i)
                 {
                     int index = FindPlayerLoopEntryIndex(function, playerLoop.subSystemList[i], playerLoopSystemType);
                     if (index != -1) return index;
@@ -96,6 +99,15 @@ namespace Mirror
                 //foreach (PlayerLoopSystem sys in playerLoop.subSystemList)
                 //    Debug.Log($"  ->{sys.type}");
 
+                // make sure the function wasn't added yet.
+                // with domain reload disabled, it would otherwise be added twice:
+                // fixes: https://github.com/MirrorNetworking/Mirror/issues/3392
+                if (Array.FindIndex(playerLoop.subSystemList, (s => s.updateDelegate == function)) != -1)
+                {
+                    // loop contains the function, so return true.
+                    return true;
+                }
+
                 // resize & expand subSystemList to fit one more entry
                 int oldListLength = (playerLoop.subSystemList != null) ? playerLoop.subSystemList.Length : 0;
                 Array.Resize(ref playerLoop.subSystemList, oldListLength + 1);
@@ -116,7 +128,6 @@ namespace Mirror
                     // shift to the right, write into first array element
                     Array.Copy(playerLoop.subSystemList, 0, playerLoop.subSystemList, 1, playerLoop.subSystemList.Length - 1);
                     playerLoop.subSystemList[0] = system;
-
                 }
                 // append our custom loop to the end
                 else if (addMode == AddMode.End)
@@ -136,7 +147,7 @@ namespace Mirror
             // recursively keep looking
             if (playerLoop.subSystemList != null)
             {
-                for(int i = 0; i < playerLoop.subSystemList.Length; ++i)
+                for (int i = 0; i < playerLoop.subSystemList.Length; ++i)
                 {
                     if (AddToPlayerLoop(function, ownerType, ref playerLoop.subSystemList[i], playerLoopSystemType, addMode))
                         return true;
@@ -146,21 +157,16 @@ namespace Mirror
         }
 
         // hook into Unity runtime to actually add our custom functions
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void RuntimeInitializeOnLoad()
         {
-            Debug.Log("Mirror: adding Network[Early/Late]Update to Unity...");
+            //Debug.Log("Mirror: adding Network[Early/Late]Update to Unity...");
 
             // get loop
             // 2019 has GetCURRENTPlayerLoop which is safe to use without
             // breaking other custom system's custom loops.
             // see also: https://github.com/vis2k/Mirror/pull/2627/files
-            PlayerLoopSystem playerLoop =
-#if UNITY_2019_3_OR_NEWER
-                PlayerLoop.GetCurrentPlayerLoop();
-#else
-                PlayerLoop.GetDefaultPlayerLoop();
-#endif
+            PlayerLoopSystem playerLoop = PlayerLoop.GetCurrentPlayerLoop();
 
             // add NetworkEarlyUpdate to the end of EarlyUpdate so it runs after
             // any Unity initializations but before the first Update/FixedUpdate
@@ -177,14 +183,27 @@ namespace Mirror
 
         static void NetworkEarlyUpdate()
         {
-            //Debug.Log("NetworkEarlyUpdate @ " + Time.time);
+            // loop functions run in edit mode and in play mode.
+            // however, we only want to call NetworkServer/Client in play mode.
+            if (!Application.isPlaying) return;
+
+            NetworkTime.EarlyUpdate();
+            //Debug.Log($"NetworkEarlyUpdate {Time.time}");
             NetworkServer.NetworkEarlyUpdate();
             NetworkClient.NetworkEarlyUpdate();
+            // invoke event after mirror has done it's early updating.
+            OnEarlyUpdate?.Invoke();
         }
 
         static void NetworkLateUpdate()
         {
-            //Debug.Log("NetworkLateUpdate @ " + Time.time);
+            // loop functions run in edit mode and in play mode.
+            // however, we only want to call NetworkServer/Client in play mode.
+            if (!Application.isPlaying) return;
+
+            //Debug.Log($"NetworkLateUpdate {Time.time}");
+            // invoke event before mirror does its final late updating.
+            OnLateUpdate?.Invoke();
             NetworkServer.NetworkLateUpdate();
             NetworkClient.NetworkLateUpdate();
         }

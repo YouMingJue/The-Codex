@@ -11,7 +11,6 @@ namespace Mirror.SimpleWeb
         readonly TcpConfig tcpConfig;
         Connection conn;
 
-
         internal WebSocketClientStandAlone(int maxMessageSize, int maxMessagesPerTick, TcpConfig tcpConfig) : base(maxMessageSize, maxMessagesPerTick)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -26,6 +25,14 @@ namespace Mirror.SimpleWeb
         public override void Connect(Uri serverAddress)
         {
             state = ClientState.Connecting;
+
+            // create connection here before thread so that send queue exist before connected
+            TcpClient client = new TcpClient();
+            tcpConfig.ApplyTo(client);
+
+            // create connection object here so dispose correctly disconnects on failed connect
+            conn = new Connection(client, AfterConnectionDisposed);
+
             Thread receiveThread = new Thread(() => ConnectAndReceiveLoop(serverAddress));
             receiveThread.IsBackground = true;
             receiveThread.Start();
@@ -35,11 +42,8 @@ namespace Mirror.SimpleWeb
         {
             try
             {
-                TcpClient client = new TcpClient();
-                tcpConfig.ApplyTo(client);
-
-                // create connection object here so dispose correctly disconnects on failed connect
-                conn = new Connection(client, AfterConnectionDisposed);
+                // connection created above
+                TcpClient client = conn.client;
                 conn.receiveThread = Thread.CurrentThread;
 
                 try
@@ -56,7 +60,7 @@ namespace Mirror.SimpleWeb
                 bool success = sslHelper.TryCreateStream(conn, serverAddress);
                 if (!success)
                 {
-                    Log.Warn("Failed to create Stream");
+                    Log.Warn("[SWT-WebSocketClientStandAlone]: Failed to create Stream with {0}", serverAddress);
                     conn.Dispose();
                     return;
                 }
@@ -64,12 +68,12 @@ namespace Mirror.SimpleWeb
                 success = handshake.TryHandshake(conn, serverAddress);
                 if (!success)
                 {
-                    Log.Warn("Failed Handshake");
+                    Log.Warn("[SWT-WebSocketClientStandAlone]: Failed Handshake with {0}", serverAddress);
                     conn.Dispose();
                     return;
                 }
 
-                Log.Info("HandShake Successful");
+                Log.Info("[SWT-WebSocketClientStandAlone]: HandShake Successful with {0}", serverAddress);
 
                 state = ClientState.Connected;
 
@@ -97,7 +101,7 @@ namespace Mirror.SimpleWeb
                 ReceiveLoop.Loop(config);
             }
             catch (ThreadInterruptedException e) { Log.InfoException(e); }
-            catch (ThreadAbortException e) { Log.InfoException(e); }
+            catch (ThreadAbortException) { Log.Error("[SWT-WebSocketClientStandAlone]: Thread Abort Exception"); }
             catch (Exception e) { Log.Exception(e); }
             finally
             {
@@ -116,15 +120,12 @@ namespace Mirror.SimpleWeb
         public override void Disconnect()
         {
             state = ClientState.Disconnecting;
-            Log.Info("Disconnect Called");
+            Log.Verbose("[SWT-WebSocketClientStandAlone]: Disconnect Called");
+
             if (conn == null)
-            {
                 state = ClientState.NotConnected;
-            }
             else
-            {
                 conn?.Dispose();
-            }
         }
 
         public override void Send(ArraySegment<byte> segment)

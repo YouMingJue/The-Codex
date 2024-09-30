@@ -32,6 +32,11 @@ namespace Mirror.SimpleWeb
         public const int ShortLength = 2;
 
         /// <summary>
+        /// bytes for long length
+        /// </summary>
+        public const int LongLength = 8;
+
+        /// <summary>
         /// Message mask is always 4 bytes
         /// </summary>
         public const int MaskSize = 4;
@@ -53,7 +58,6 @@ namespace Mirror.SimpleWeb
         /// if payload length is 127 when next 8 bytes will be the length
         /// </summary>
         public const int UlongPayloadLength = 127;
-
 
         /// <summary>
         /// Guid used for WebSocket Protocol

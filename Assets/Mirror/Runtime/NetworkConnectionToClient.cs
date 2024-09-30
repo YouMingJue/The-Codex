@@ -1,177 +1,146 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace Mirror
 {
     public class NetworkConnectionToClient : NetworkConnection
     {
-        public override string address =>
-            Transport.activeTransport.ServerGetClientAddress(connectionId);
+        // rpcs are collected in a buffer, and then flushed out together.
+        // this way we don't need one NetworkMessage per rpc.
+        // => prepares for LocalWorldState as well.
+        // ensure max size when adding!
+        readonly NetworkWriter reliableRpcs = new NetworkWriter();
+        readonly NetworkWriter unreliableRpcs = new NetworkWriter();
 
-        // batching from server to client.
-        // fewer transport calls give us significantly better performance/scale.
-        //
-        // for a 64KB max message transport and 64 bytes/message on average, we
-        // reduce transport calls by a factor of 1000.
-        //
-        // depending on the transport, this can give 10x performance.
-        //
-        // Dictionary<channelId, batch> because we have multiple channels.
-        internal class Batch
-        {
-            // batched messages
-            // IMPORTANT: we queue the serialized messages!
-            //            queueing NetworkMessage would box and allocate!
-            internal Queue<PooledNetworkWriter> messages = new Queue<PooledNetworkWriter>();
+        public virtual string address { get; private set; }
 
-            // each channel's batch has its own lastSendTime.
-            // (use NetworkTime for maximum precision over days)
-            //
-            // channel batches are full and flushed at different times. using
-            // one global time wouldn't make sense.
-            // -> we want to be able to reset a channels send time after Send()
-            //    flushed it because full. global time wouldn't allow that, so
-            //    we would often flush in Send() and then flush again in Update
-            //    even though we just flushed in Send().
-            // -> initialize with current NetworkTime so first update doesn't
-            //    calculate elapsed via 'now - 0'
-            internal double lastSendTime = NetworkTime.time;
-        }
-        Dictionary<int, Batch> batches = new Dictionary<int, Batch>();
+        /// <summary>NetworkIdentities that this connection can see</summary>
+        // TODO move to server's NetworkConnectionToClient?
+        public readonly HashSet<NetworkIdentity> observing = new HashSet<NetworkIdentity>();
 
-        // batch messages and send them out in LateUpdate (or after batchInterval)
-        bool batching;
+        // unbatcher
+        public Unbatcher unbatcher = new Unbatcher();
 
-        // batch interval is 0 by default, meaning that we send immediately.
-        // (useful to run tests without waiting for intervals too)
-        float batchInterval;
+        // server runs a time snapshot interpolation for each client's local time.
+        // this is necessary for client auth movement to still be smooth on the
+        // server for host mode.
+        // TODO move them along server's timeline in the future.
+        //      perhaps with an offset.
+        //      for now, keep compatibility by manually constructing a timeline.
+        ExponentialMovingAverage driftEma;
+        ExponentialMovingAverage deliveryTimeEma; // average delivery time (standard deviation gives average jitter)
+        public double remoteTimeline;
+        public double remoteTimescale;
+        double bufferTimeMultiplier = 2;
+        double bufferTime => NetworkServer.sendInterval * bufferTimeMultiplier;
 
-        public NetworkConnectionToClient(int networkConnectionId, bool batching, float batchInterval)
+        // <clienttime, snaps>
+        readonly SortedList<double, TimeSnapshot> snapshots = new SortedList<double, TimeSnapshot>();
+
+        // Snapshot Buffer size limit to avoid ever growing list memory consumption attacks from clients.
+        public int snapshotBufferSizeLimit = 64;
+
+        // ping for rtt (round trip time)
+        // useful for statistics, lag compensation, etc.
+        double lastPingTime = 0;
+        internal ExponentialMovingAverage _rtt = new ExponentialMovingAverage(NetworkTime.PingWindowSize);
+
+        /// <summary>Round trip time (in seconds) that it takes a message to go server->client->server.</summary>
+        public double rtt => _rtt.Value;
+
+        public NetworkConnectionToClient(int networkConnectionId, string clientAddress = "localhost")
             : base(networkConnectionId)
         {
-            this.batching = batching;
-            this.batchInterval = batchInterval;
+            address = clientAddress;
+
+            // initialize EMA with 'emaDuration' seconds worth of history.
+            // 1 second holds 'sendRate' worth of values.
+            // multiplied by emaDuration gives n-seconds.
+            driftEma = new ExponentialMovingAverage(NetworkServer.sendRate * NetworkClient.snapshotSettings.driftEmaDuration);
+            deliveryTimeEma = new ExponentialMovingAverage(NetworkServer.sendRate * NetworkClient.snapshotSettings.deliveryTimeEmaDuration);
+
+            // buffer limit should be at least multiplier to have enough in there
+            snapshotBufferSizeLimit = Mathf.Max((int)NetworkClient.snapshotSettings.bufferTimeMultiplier, snapshotBufferSizeLimit);
         }
 
-        Batch GetBatchForChannelId(int channelId)
+        public void OnTimeSnapshot(TimeSnapshot snapshot)
         {
-            // get existing or create new writer for the channelId
-            Batch batch;
-            if (!batches.TryGetValue(channelId, out batch))
+            // protect against ever growing buffer size attacks
+            if (snapshots.Count >= snapshotBufferSizeLimit) return;
+
+            // (optional) dynamic adjustment
+            if (NetworkClient.snapshotSettings.dynamicAdjustment)
             {
-                batch = new Batch();
-                batches[channelId] = batch;
-            }
-            return batch;
-        }
-
-        // send a batch. internal so we can test it.
-        internal void SendBatch(int channelId, Batch batch)
-        {
-            // get max batch size for this channel
-            int max = Transport.activeTransport.GetMaxBatchSize(channelId);
-
-            // we need a writer to merge queued messages into a batch
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-            {
-                // for each queued message
-                while (batch.messages.Count > 0)
-                {
-                    // get it
-                    PooledNetworkWriter message = batch.messages.Dequeue();
-                    ArraySegment<byte> segment = message.ToArraySegment();
-
-                    // IF adding to writer would end up >= MTU then we should
-                    // flush first. the goal is to always flush < MTU packets.
-                    //
-                    // IMPORTANT: if writer is empty and segment is > MTU
-                    //            (which can happen for large max sized message)
-                    //            then we would send an empty previous writer.
-                    //            => don't do that.
-                    //            => only send if not empty.
-                    if (writer.Position > 0 &&
-                        writer.Position + segment.Count >= max)
-                    {
-                        // flush & reset writer
-                        Transport.activeTransport.ServerSend(connectionId, writer.ToArraySegment(), channelId);
-                        writer.Position = 0;
-                    }
-
-                    // now add to writer in any case
-                    // -> WriteBytes instead of WriteSegment because the latter
-                    //    would add a size header. we want to write directly.
-                    //
-                    // NOTE: it's very possible that we add > MTU to writer if
-                    //       message size is > MTU.
-                    //       which is fine. next iteration will just flush it.
-                    writer.WriteBytes(segment.Array, segment.Offset, segment.Count);
-
-                    // return queued message to pool
-                    NetworkWriterPool.Recycle(message);
-                }
-
-                // done iterating queued messages.
-                // batch might still contain the last message.
-                // send it.
-                if (writer.Position > 0)
-                {
-                    Transport.activeTransport.ServerSend(connectionId, writer.ToArraySegment(), channelId);
-                    writer.Position = 0;
-                }
+                // set bufferTime on the fly.
+                // shows in inspector for easier debugging :)
+                bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(
+                    NetworkServer.sendInterval,
+                    deliveryTimeEma.StandardDeviation,
+                    NetworkClient.snapshotSettings.dynamicAdjustmentTolerance
+                );
+                // Debug.Log($"[Server]: {name} delivery std={serverDeliveryTimeEma.StandardDeviation} bufferTimeMult := {bufferTimeMultiplier} ");
             }
 
-            // reset send time for this channel's batch
-            batch.lastSendTime = NetworkTime.time;
+            // insert into the server buffer & initialize / adjust / catchup
+            SnapshotInterpolation.InsertAndAdjust(
+                snapshots,
+                NetworkClient.snapshotSettings.bufferLimit,
+                snapshot,
+                ref remoteTimeline,
+                ref remoteTimescale,
+                NetworkServer.sendInterval,
+                bufferTime,
+                NetworkClient.snapshotSettings.catchupSpeed,
+                NetworkClient.snapshotSettings.slowdownSpeed,
+                ref driftEma,
+                NetworkClient.snapshotSettings.catchupNegativeThreshold,
+                NetworkClient.snapshotSettings.catchupPositiveThreshold,
+                ref deliveryTimeEma
+            );
         }
 
-        internal override void Send(ArraySegment<byte> segment, int channelId = Channels.Reliable)
+        public void UpdateTimeInterpolation()
         {
-            //Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
-
-            // validate packet size first.
-            if (ValidatePacketSize(segment, channelId))
+            // timeline starts when the first snapshot arrives.
+            if (snapshots.Count > 0)
             {
-                // batching? then add to queued messages
-                if (batching)
-                {
-                    // put into a (pooled) writer
-                    // -> WriteBytes instead of WriteSegment because the latter
-                    //    would add a size header. we want to write directly.
-                    // -> will be returned to pool when sending!
-                    PooledNetworkWriter writer = NetworkWriterPool.GetWriter();
-                    writer.WriteBytes(segment.Array, segment.Offset, segment.Count);
+                // progress local timeline.
+                SnapshotInterpolation.StepTime(Time.unscaledDeltaTime, ref remoteTimeline, remoteTimescale);
 
-                    // add to batch queue
-                    Batch batch = GetBatchForChannelId(channelId);
-                    batch.messages.Enqueue(writer);
-                }
-                // otherwise send directly to minimize latency
-                else Transport.activeTransport.ServerSend(connectionId, segment, channelId);
+                // progress local interpolation.
+                // TimeSnapshot doesn't interpolate anything.
+                // this is merely to keep removing older snapshots.
+                SnapshotInterpolation.StepInterpolation(snapshots, remoteTimeline, out _, out _, out _);
+                // Debug.Log($"NetworkClient SnapshotInterpolation @ {localTimeline:F2} t={t:F2}");
             }
         }
 
-        // flush batched messages every batchInterval to make sure that they are
-        // sent out every now and then, even if the batch isn't full yet.
-        // (avoids 30s latency if batches would only get full every 30s)
-        internal void Update()
+        // Send stage three: hand off to transport
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected override void SendToTransport(ArraySegment<byte> segment, int channelId = Channels.Reliable) =>
+            Transport.active.ServerSend(connectionId, segment, channelId);
+
+        protected virtual void UpdatePing()
         {
-            // batching?
-            if (batching)
+            // localTime (double) instead of Time.time for accuracy over days
+            if (NetworkTime.localTime >= lastPingTime + NetworkTime.PingInterval)
             {
-                // go through batches for all channels
-                foreach (KeyValuePair<int, Batch> kvp in batches)
-                {
-                    // enough time elapsed to flush this channel's batch?
-                    // and not empty?
-                    double elapsed = NetworkTime.time - kvp.Value.lastSendTime;
-                    if (elapsed >= batchInterval && kvp.Value.messages.Count > 0)
-                    {
-                        // send the batch. time will be reset internally.
-                        //Debug.Log($"sending batch of {kvp.Value.writer.Position} bytes for channel={kvp.Key} connId={connectionId}");
-                        SendBatch(kvp.Key, kvp.Value);
-                    }
-                }
+                // TODO it would be safer for the server to store the last N
+                // messages' timestamp and only send a message number.
+                // This way client's can't just modify the timestamp.
+                // predictedTime parameter is 0 because the server doesn't predict.
+                NetworkPingMessage pingMessage = new NetworkPingMessage(NetworkTime.localTime, 0);
+                Send(pingMessage, Channels.Unreliable);
+                lastPingTime = NetworkTime.localTime;
             }
+        }
+
+        internal override void Update()
+        {
+            UpdatePing();
+            base.Update();
         }
 
         /// <summary>Disconnects this connection.</summary>
@@ -180,14 +149,73 @@ namespace Mirror
             // set not ready and handle clientscene disconnect in any case
             // (might be client or host mode here)
             isReady = false;
-            Transport.activeTransport.ServerDisconnect(connectionId);
+            reliableRpcs.Position = 0;
+            unreliableRpcs.Position = 0;
+            Transport.active.ServerDisconnect(connectionId);
 
             // IMPORTANT: NetworkConnection.Disconnect() is NOT called for
             // voluntary disconnects from the other end.
             // -> so all 'on disconnect' cleanup code needs to be in
             //    OnTransportDisconnect, where it's called for both voluntary
             //    and involuntary disconnects!
-            RemoveFromObservingsObservers();
+        }
+
+        internal void AddToObserving(NetworkIdentity netIdentity)
+        {
+            observing.Add(netIdentity);
+
+            // spawn identity for this conn
+            NetworkServer.ShowForConnection(netIdentity, this);
+        }
+
+        internal void RemoveFromObserving(NetworkIdentity netIdentity, bool isDestroyed)
+        {
+            observing.Remove(netIdentity);
+
+            if (!isDestroyed)
+            {
+                // hide identity for this conn
+                NetworkServer.HideForConnection(netIdentity, this);
+            }
+        }
+
+        internal void RemoveFromObservingsObservers()
+        {
+            foreach (NetworkIdentity netIdentity in observing)
+            {
+                netIdentity.RemoveObserver(this);
+            }
+            observing.Clear();
+        }
+
+        internal void AddOwnedObject(NetworkIdentity obj)
+        {
+            owned.Add(obj);
+        }
+
+        internal void RemoveOwnedObject(NetworkIdentity obj)
+        {
+            owned.Remove(obj);
+        }
+
+        internal void DestroyOwnedObjects()
+        {
+            // create a copy because the list might be modified when destroying
+            HashSet<NetworkIdentity> tmp = new HashSet<NetworkIdentity>(owned);
+            foreach (NetworkIdentity netIdentity in tmp)
+            {
+                if (netIdentity != null)
+                {
+                    // disown scene objects, destroy instantiated objects.
+                    if (netIdentity.sceneId != 0)
+                        NetworkServer.RemovePlayerForConnection(this, RemovePlayerOptions.KeepActive);
+                    else
+                        NetworkServer.Destroy(netIdentity.gameObject);
+                }
+            }
+
+            // clear the hashset because we destroyed them all
+            owned.Clear();
         }
     }
 }

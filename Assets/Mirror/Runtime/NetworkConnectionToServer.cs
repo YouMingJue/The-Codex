@@ -1,21 +1,14 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Mirror
 {
     public class NetworkConnectionToServer : NetworkConnection
     {
-        public override string address => "";
-
-        internal override void Send(ArraySegment<byte> segment, int channelId = Channels.Reliable)
-        {
-            // Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
-
-            // validate packet size first.
-            if (ValidatePacketSize(segment, channelId))
-            {
-                Transport.activeTransport.ClientSend(segment, channelId);
-            }
-        }
+        // Send stage three: hand off to transport
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected override void SendToTransport(ArraySegment<byte> segment, int channelId = Channels.Reliable) =>
+            Transport.active.ClientSend(segment, channelId);
 
         /// <summary>Disconnects this connection.</summary>
         public override void Disconnect()
@@ -25,7 +18,7 @@ namespace Mirror
             // TODO remove redundant state. have one source of truth for .ready!
             isReady = false;
             NetworkClient.ready = false;
-            Transport.activeTransport.ClientDisconnect();
+            Transport.active.ClientDisconnect();
         }
     }
 }

@@ -31,7 +31,10 @@ namespace Mirror.SimpleWeb
         {
             config = sslConfig;
             if (config.enabled)
+            {
                 certificate = new X509Certificate2(config.certPath, config.certPassword);
+                Log.Info($"[SWT-ServerSslHelper]: SSL Certificate {0} loaded with expiration of {1}", certificate.Subject, certificate.GetExpirationDateString());
+            }
         }
 
         internal bool TryCreateStream(Connection conn)
@@ -46,7 +49,7 @@ namespace Mirror.SimpleWeb
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"Create SSLStream Failed: {e}", false);
+                    Log.Error("[SWT-ServerSslHelper]: Create SSLStream Failed: {0}", e.Message);
                     return false;
                 }
             }
@@ -65,10 +68,7 @@ namespace Mirror.SimpleWeb
             return sslStream;
         }
 
-        bool acceptClient(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            // always accept client
-            return true;
-        }
+        // always accept client
+        bool acceptClient(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) => true;
     }
 }

@@ -1,13 +1,8 @@
-using System;
+// API consistent with Microsoft's ObjectPool<T>.
+using System.Runtime.CompilerServices;
 
 namespace Mirror
 {
-    /// <summary>Pooled NetworkWriter, automatically returned to pool when using 'using'</summary>
-    public sealed class PooledNetworkWriter : NetworkWriter, IDisposable
-    {
-        public void Dispose() => NetworkWriterPool.Recycle(this);
-    }
-
     /// <summary>Pool of NetworkWriters to avoid allocations.</summary>
     public static class NetworkWriterPool
     {
@@ -16,24 +11,28 @@ namespace Mirror
         // position before reusing.
         // this is also more consistent with NetworkReaderPool where we need to
         // assign the internal buffer before reusing.
-        static readonly Pool<PooledNetworkWriter> Pool = new Pool<PooledNetworkWriter>(
-            () => new PooledNetworkWriter(),
+        static readonly Pool<NetworkWriterPooled> Pool = new Pool<NetworkWriterPooled>(
+            () => new NetworkWriterPooled(),
             // initial capacity to avoid allocations in the first few frames
             // 1000 * 1200 bytes = around 1 MB.
             1000
         );
 
+        // expose count for testing
+        public static int Count => Pool.Count;
+
         /// <summary>Get a writer from the pool. Creates new one if pool is empty.</summary>
-        public static PooledNetworkWriter GetWriter()
+        public static NetworkWriterPooled Get()
         {
             // grab from pool & reset position
-            PooledNetworkWriter writer = Pool.Take();
+            NetworkWriterPooled writer = Pool.Get();
             writer.Reset();
             return writer;
         }
 
         /// <summary>Return a writer to the pool.</summary>
-        public static void Recycle(PooledNetworkWriter writer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Return(NetworkWriterPooled writer)
         {
             Pool.Return(writer);
         }
