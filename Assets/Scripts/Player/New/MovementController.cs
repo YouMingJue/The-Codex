@@ -81,7 +81,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [Server]
+    [Command]
     private void CmdFlipPlayerHorizontally(float inputX)
     {
         FlipHorizontally(inputX);
@@ -91,7 +91,9 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     private void RpcFlipPlayerHorizontallyOnClients(float inputX)
     {
-        FlipHorizontally(inputX);
+        Vector3 newScale = anim.transform.localScale;
+        newScale.x = Mathf.Abs(newScale.x) * Mathf.Sign(inputX);
+        anim.transform.localScale = newScale;
     }
 
     public void SetPosition()
