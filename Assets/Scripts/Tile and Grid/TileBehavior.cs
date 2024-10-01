@@ -96,7 +96,7 @@ public class TileBehavior : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Server]
     public void CmdConvertTile(Element convertType)
     {
         Debug.Log($"[{Time.time}] Converting tile to {convertType} on server");
@@ -161,22 +161,23 @@ public class TileBehavior : NetworkBehaviour
     {
         if (!IsOvercoming(paintType))
         {
-            PlayerAbility playerAbility = FindObjectOfType<PlayerAbility>();
-            if (playerAbility != null)
-            {
-                playerAbility.PlayerConvertTile(paintType);
-            }
+            CmdConvertTile(paintType);
+            //PlayerAbility playerAbility = FindObjectOfType<PlayerAbility>();
+            //if (playerAbility != null)
+            //{
+            //    playerAbility.PlayerConvertTile(paintType);
+            //}
         }
     }
 
-    [Command]
+    [Server]
     private void CmdRequestTileConversion(Element paintType)
     {
         CmdConvertTile(paintType);
     }
 
 
-    [Command]
+    [Server]
     private void CmdRestoreElement()
     {
         if (element != originalElement)

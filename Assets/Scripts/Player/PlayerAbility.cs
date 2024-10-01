@@ -71,7 +71,7 @@ public class PlayerAbility : NetworkBehaviour
         CmdConvertTileOnPlayer(convertType);
     }
 
-    [Server]
+    [Command]
     public void CmdConvertTileOnPlayer(Element convertType)
     {
         // 首先找到当前玩家所在位置对应的Tile
