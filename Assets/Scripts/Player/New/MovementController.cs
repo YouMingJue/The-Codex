@@ -81,7 +81,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Server]
     private void CmdFlipPlayerHorizontally(float inputX)
     {
         FlipHorizontally(inputX);
