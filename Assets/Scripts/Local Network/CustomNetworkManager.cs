@@ -35,10 +35,10 @@ public class CustomNetworkManager : NetworkManager
     public override void OnServerSceneChanged(string sceneName)
     {
         base.OnServerSceneChanged(sceneName);
-        if (sceneName == LobbyController.Instance.GameScene)
+        if (sceneName == LobbyController.Instance.GameScene && tileManagerObject != null)
         {
             GameObject tileManagerObjectInstance = Instantiate(tileManagerObject);
-            // ÕâÀï¿ÉÒÔ½øÒ»²½¶ÔtileManagerObjectInstance½øĞĞ²Ù×÷£¬ÈçÉèÖÃÎ»ÖÃ¡¢¸¸¶ÔÏóµÈ
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½tileManagerObjectInstanceï¿½ï¿½ï¿½Ğ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             TileManager tileManager = tileManagerObjectInstance.GetComponent<TileManager>();
             if (tileManager != null)
             {

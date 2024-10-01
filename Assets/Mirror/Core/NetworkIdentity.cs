@@ -189,7 +189,7 @@ namespace Mirror
         // to save bandwidth, we send one 64 bit dirty mask
         // instead of 1 byte index per dirty component.
         // which means we can't allow > 64 components (it's enough).
-        const int MaxNetworkBehaviours = 64;
+        const int MaxNetworkBehaviours = 6400;
 
         // current visibility
         //

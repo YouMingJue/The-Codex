@@ -925,7 +925,6 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs:
-  - {fileID: 151384543189406730, guid: 787824e92f295604ca939685f92df765, type: 3}
   - {fileID: 893134788455674003, guid: e664220726dd73f4fb74f6d7d0a4d969, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
@@ -943,7 +942,7 @@ MonoBehaviour:
   evaluationInterval: 3
   timeInterpolationGui: 0
   GamePlayerPrefab: {fileID: 5705283258010073036, guid: 3a3509cb69f9d284f9f7f4778f6f7c89, type: 3}
-  tileManagerObject: {fileID: 151384543189406730, guid: 787824e92f295604ca939685f92df765, type: 3}
+  tileManagerObject: {fileID: 0}
 --- !u!4 &2017064682
 Transform:
   m_ObjectHideFlags: 0

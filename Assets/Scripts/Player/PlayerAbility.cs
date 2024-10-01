@@ -162,7 +162,8 @@ public class PlayerAbility : NetworkBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            Attack(collider.gameObject.GetComponent<NetworkIdentity>(), 20);
+            if (!collider.gameObject.GetComponent<NetworkIdentity>())
+                Attack(collider.gameObject.GetComponent<NetworkIdentity>(), 20);
         }
     }
 
