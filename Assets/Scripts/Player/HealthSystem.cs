@@ -76,7 +76,7 @@ public class HealthSystem : NetworkBehaviour
         }
     }
 
-    private void OnHealthChanged(int oldHealth, int newHealth)
+    void OnHealthChanged(int oldHealth, int newHealth)
     {
         // Update slider value on all clients
         if (healthSlider != null)

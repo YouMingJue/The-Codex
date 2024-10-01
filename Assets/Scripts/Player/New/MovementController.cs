@@ -27,6 +27,9 @@ public class PlayerController : NetworkBehaviour
 
     private PlayerObjectController playerObjectController;
 
+    [SyncVar(hook = nameof(OnFlipXChange))]
+    Vector3 newScale;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -68,32 +71,14 @@ public class PlayerController : NetworkBehaviour
 
     void FlipHorizontally(float inputX)                                                                                                             
     {
-        Vector3 newScale = anim.transform.localScale;
+        newScale = anim.transform.localScale;
         newScale.x = Mathf.Abs(newScale.x) * Mathf.Sign(inputX);
         anim.transform.localScale = newScale;
     }
 
-    public void FlipPlayerHorizontally(float inputX)
+    public void OnFlipXChange(Vector3 oldValue, Vector3 newValue)
     {
-        if (isServer)
-        {
-            CmdFlipPlayerHorizontally(inputX);
-        }
-    }
-
-    [Command]
-    private void CmdFlipPlayerHorizontally(float inputX)
-    {
-        FlipHorizontally(inputX);
-        RpcFlipPlayerHorizontallyOnClients(inputX);
-    }
-
-    [ClientRpc]
-    private void RpcFlipPlayerHorizontallyOnClients(float inputX)
-    {
-        Vector3 newScale = anim.transform.localScale;
-        newScale.x = Mathf.Abs(newScale.x) * Mathf.Sign(inputX);
-        anim.transform.localScale = newScale;
+        anim.transform.localScale = newValue;
     }
 
     public void SetPosition()
