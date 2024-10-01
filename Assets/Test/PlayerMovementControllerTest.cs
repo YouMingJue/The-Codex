@@ -28,7 +28,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
     private void Start()
     {
         PlayerModel.SetActive(false); // Disable player model at the start
-        tileManager = FindObjectOfType<TileManager>(); // Find TileManager
+        tileManager = FindFirstObjectByType<TileManager>(); // Find TileManager
         playerAbility = GetComponent<PlayerAbility>();
         health = GetComponent<HealthSystem>();
 

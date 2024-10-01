@@ -52,7 +52,7 @@ MonoBehaviour:
   syncInterval: 0.1
   element: 0
   originalElement: 0
-  _tile: {fileID: 0}
+  _tile: {fileID: 11400000, guid: 1f7b38703ad1b8c48a98ee945f345d22, type: 2}
   collid: {fileID: 0}
   position: {x: 0, y: 0, z: 0}
   convertCD: 3

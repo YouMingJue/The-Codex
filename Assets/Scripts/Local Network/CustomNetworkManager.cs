@@ -38,6 +38,7 @@ public class CustomNetworkManager : NetworkManager
         if (sceneName == LobbyController.Instance.GameScene && tileManagerObject != null)
         {
             GameObject tileManagerObjectInstance = Instantiate(tileManagerObject);
+            NetworkServer.Spawn(tileManagerObjectInstance);
             // ������Խ�һ����tileManagerObjectInstance���в�����������λ�á��������
             TileManager tileManager = tileManagerObjectInstance.GetComponent<TileManager>();
             if (tileManager != null)

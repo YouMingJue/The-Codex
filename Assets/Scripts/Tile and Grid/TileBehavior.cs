@@ -26,9 +26,13 @@ public class TileBehavior : NetworkBehaviour
 
     private List<TileBehavior> neighboringTiles;
 
+    private void Awake()
+    {
+        NetworkServer.Spawn(gameObject);
+    }
+
     public void Init(ElementalTile tile, Vector3Int cellPos)
     {
-
             CmdInit(tile, cellPos);
     }
 
@@ -38,10 +42,10 @@ public class TileBehavior : NetworkBehaviour
         {
             TileManager.instance.tiles.Add(this);
             neighboringTiles = TileManager.instance.GetSurroundingTiles(position);
-            // ÕâÀïÈç¹ûÐèÒªÔÚ·þÎñÆ÷Æô¶¯Ê±³õÊ¼»¯ÌØ¶¨tile£¬¿ÉÒÔµ÷ÓÃInit·½·¨»òÕßÖ±½ÓÊ¹ÓÃCmdInit
-            // ¼ÙÉèÕâÀïÓÐÒ»¸öÄ¬ÈÏµÄ³õÊ¼»¯ÐèÇó
-            ElementalTile defaultTile = null; // ÕâÀïÐèÒª¸ù¾ÝÊµ¼ÊÇé¿ö¸³Öµ
-            Vector3Int defaultPos = new Vector3Int(0, 0, 0); // ÕâÀïÐèÒª¸ù¾ÝÊµ¼ÊÇé¿ö¸³Öµ
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ø¶ï¿½tileï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½Initï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Ê¹ï¿½ï¿½CmdInit
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ä¬ï¿½ÏµÄ³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            ElementalTile defaultTile = null; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+            Vector3Int defaultPos = new Vector3Int(0, 0, 0); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
             Init(defaultTile, defaultPos);
         }
     }
@@ -50,6 +54,7 @@ public class TileBehavior : NetworkBehaviour
     [Server]
     public void CmdInit(ElementalTile tile, Vector3Int cellPos)
     {
+        Debug.Log("WOWOWOW");
         _tile = tile;
         position = cellPos;
         RpcInitOnClients(tile, cellPos);
@@ -58,6 +63,7 @@ public class TileBehavior : NetworkBehaviour
     [ClientRpc]
     private void RpcInitOnClients(ElementalTile tile, Vector3Int cellPos)
     {
+        Debug.Log("JB!!");
         _tile = tile;
         position = cellPos;
     }
@@ -99,6 +105,7 @@ public class TileBehavior : NetworkBehaviour
         Debug.Log($"[{Time.time}] Converting tile to {convertType} on server");
         element = convertType;
         Debug.Log($"[{Time.time}] First Element: {element} on server");
+        Debug.Log("you mei you tile?" + _tile);
         _tile.RefreshTile(position, TileManager.instance.tilemap);
         Debug.Log($"[{Time.time}] Second Element: {element} on server");
         restoreCD = 5;
