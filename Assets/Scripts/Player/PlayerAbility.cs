@@ -53,12 +53,12 @@ public class PlayerAbility : NetworkBehaviour
     [SerializeField] private UnityEngine.UI.Slider manaBar;
     [SerializeField] private float fireDamage;
 
-    // ĞÂÔö·½·¨ÓÃÓÚ·¢ËÍ×ª»»TileµÄÃüÁî
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½×ªï¿½ï¿½Tileï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     public void SendCmdConvertTile(Element convertType)
     {
         if (playerObjectController.isOwned)
         {
-            // ÕâÀï¼ÙÉèÍ¨¹ıµ±Ç°Íæ¼ÒÎ»ÖÃ»ñÈ¡Tile£¬¿ÉÄÜĞèÒª¸ù¾İÊµ¼ÊÇé¿öµ÷Õû
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Î»ï¿½Ã»ï¿½È¡Tileï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Vector3Int currentTilePos = TileManager.instance.tilemap.WorldToCell(transform.position);
             TileBehavior currentTile = TileManager.instance.tilemap.GetInstantiatedObject(currentTilePos)?.GetComponent<TileBehavior>();
             if (currentTile != null)
@@ -76,26 +76,26 @@ public class PlayerAbility : NetworkBehaviour
     [Command]
     public void CmdConvertTileOnPlayer(Element convertType)
     {
-        // Ê×ÏÈÕÒµ½µ±Ç°Íæ¼ÒËùÔÚÎ»ÖÃ¶ÔÓ¦µÄTile
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¶ï¿½Ó¦ï¿½ï¿½Tile
         Vector3Int currentTilePos = TileManager.instance.tilemap.WorldToCell(transform.position);
         TileBehavior currentTile = TileManager.instance.tilemap.GetInstantiatedObject(currentTilePos)?.GetComponent<TileBehavior>();
         if (currentTile != null)
         {
-            // ÔÚTileÉÏÖ´ĞĞ×ª»»Âß¼­
+            // ï¿½ï¿½Tileï¿½ï¿½Ö´ï¿½ï¿½×ªï¿½ï¿½ï¿½ß¼ï¿½
             currentTile.element = convertType;
             currentTile._tile.RefreshTile(currentTile.position, TileManager.instance.tilemap);
             currentTile.restoreCD = 5;
             currentTile.convertCD = 3;
             if (convertType == Element.Fire)
             {
-                // ÕâÀï¼ÙÉèGenerateFireEffectÊÇTileÉÏµÄ·½·¨£¬Èç¹ûĞèÒªÔÚÍæ¼Ò½Å±¾´¦Àí£¬Âß¼­ĞèÒªµ÷Õû
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½GenerateFireEffectï¿½ï¿½Tileï¿½ÏµÄ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ò½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
                 // currentTile.GenerateFireEffect();
             }
             currentTile.RpcUpdateTileOnClients();
         }
     }
 
-    // StartÊÇÔÚ¶ÔÏó³õÊ¼»¯Ê±µ÷ÓÃÒ»´Î
+    // Startï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
     void Start()
     {
         manaBar.maxValue = mana;
@@ -108,7 +108,7 @@ public class PlayerAbility : NetworkBehaviour
         networkAnimator = GetComponent<NetworkAnimator>();
     }
 
-    // UpdateÊÇÃ¿Ò»Ö¡µ÷ÓÃÒ»´Î
+    // Updateï¿½ï¿½Ã¿Ò»Ö¡ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
     void Update()
     {
         if (playerObjectController.isOwned)
@@ -116,7 +116,7 @@ public class PlayerAbility : NetworkBehaviour
             switch (element)
             {
                 case Element.Water:
-                    // ¼ì²éÍæ¼ÒÊÇ·ñÔÚË®ÍßÆ¬ÉÏ²¢ÇÒ°´ÏÂ×óShift¼ü
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ë®ï¿½ï¿½Æ¬ï¿½Ï²ï¿½ï¿½Ò°ï¿½ï¿½ï¿½ï¿½ï¿½Shiftï¿½ï¿½
                     if (currentTile != null && currentTile.element == Element.Water && currentState == Buff.None)
                     {
                         if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= manaCostAmount)
@@ -135,14 +135,14 @@ public class PlayerAbility : NetworkBehaviour
                     break;
             }
 
-            // ¼ì²é×ó¼üµã»÷£¨Çá¹¥»÷£©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á¹¥ï¿½ï¿½ï¿½ï¿½
             if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking)
             {
                 isAttacking = true;
                 networkAnimator.SetTrigger("LightAttack");
             }
 
-            // ¼ì²éE¼ü£¨ÖØ¹¥»÷£©
+            // ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½Ø¹ï¿½ï¿½ï¿½ï¿½ï¿½
             if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
             {
                 isAttacking = true;
@@ -162,7 +162,7 @@ public class PlayerAbility : NetworkBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            Attack(collider, 20);
+            Attack(collider.gameObject.GetComponent<NetworkIdentity>(), 20);
         }
     }
 
@@ -183,11 +183,11 @@ public class PlayerAbility : NetworkBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            Attack(collider, 30);
+            Attack(collider.gameObject.GetComponent<NetworkIdentity>(), 30);
             TileBehavior tile = collider.GetComponent<TileBehavior>();
             if (tile != null)
             {
-                // ½¨Á¢PlayerÓëTileµÄÒıÓÃ¹ØÏµ
+                // ï¿½ï¿½ï¿½ï¿½Playerï¿½ï¿½Tileï¿½ï¿½ï¿½ï¿½ï¿½Ã¹ï¿½Ïµ
                 tile.relatedPlayer = this;
                 tile.PaintTile(element);
             }
@@ -199,11 +199,18 @@ public class PlayerAbility : NetworkBehaviour
         Mana += restoreAmount;
     }
 
-    public void Attack(Collider2D collider, int damage)
+    [Command]
+    public void Attack(NetworkIdentity target, int damage)
     {
-        if (collider.TryGetComponent(out HealthSystem entity) && collider.transform != transform)
+        Collider2D collider = target.GetComponent<Collider2D>();
+        if (collider != null && collider.transform != transform)
         {
-            entity.TakeDamage(damage, transform);
+            // ç¡®ä¿ç›®æ ‡å¯¹è±¡æœ‰ HealthSystem ç»„ä»¶
+            HealthSystem entity = collider.GetComponent<HealthSystem>();
+            if (entity != null)
+            {
+                entity.TakeDamage(damage, transform);
+            }
         }
     }
 
@@ -232,10 +239,10 @@ public class PlayerAbility : NetworkBehaviour
             case Buff.WaterState:
                 Mana -= ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
                       ? manaCostAmount * 1.5f : manaCostAmount * 0.4f) * Time.fixedDeltaTime;
-                // ¼ì²éÍæ¼ÒÊÇ·ñÕ¾ÔÚË®ÍßÆ¬ÉÏ
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½Õ¾ï¿½ï¿½Ë®ï¿½ï¿½Æ¬ï¿½ï¿½
                 if (currentTile == null || currentTile.element != Element.Water)
                 {
-                    // ´¥·¢Óëµ±Ç°ÍßÆ¬µÄ½»»¥£¨¼´Ê¹²»ÊÇË®ÍßÆ¬£©
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ëµ±Ç°ï¿½ï¿½Æ¬ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½Ë®ï¿½ï¿½Æ¬ï¿½ï¿½
                     onTileInteraction?.Invoke(currentTile);
                 }
                 break;
@@ -246,10 +253,10 @@ public class PlayerAbility : NetworkBehaviour
     {
         if (SceneManager.GetActiveScene().name == "Playground")
         {
-            // ½«ÊÀ½ç×ø±ê×ª»»ÎªÍßÆ¬µØÍ¼µÄµ¥Ôª¸ñÎ»ÖÃ
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªï¿½ï¿½Æ¬ï¿½ï¿½Í¼ï¿½Äµï¿½Ôªï¿½ï¿½Î»ï¿½ï¿½
             Vector3Int cellPosition = TileManager.instance.tilemap.WorldToCell(transform.position);
 
-            // Èç¹ûÍæ¼ÒÒÆ¶¯µ½ÁËĞÂµÄµ¥Ôª¸ñ£¬¸üĞÂµ±Ç°ÍßÆ¬
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÂµÄµï¿½Ôªï¿½ñ£¬¸ï¿½ï¿½Âµï¿½Ç°ï¿½ï¿½Æ¬
             if (cellPosition != currentTilePos)
             {
                 currentTilePos = cellPosition;
