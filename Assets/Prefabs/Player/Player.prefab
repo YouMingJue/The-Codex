@@ -398,6 +398,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e45f35cf567768a4aa12b9ddf0a32ce8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   moveSpeed: 5
   frictionFactor: 2
   detectRadius: 0
@@ -444,6 +446,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7cd0d3aa205b5b478f70e627ba95b44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   AttackRange: {fileID: 3931563700210221727}
   targetLayer:
     serializedVersion: 2
@@ -467,6 +471,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 068b91ba9c4ae094ab2f695f020f0f56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   maxHealth: 100
   currentHealth: 0
   isImmune: 0
@@ -558,9 +564,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f6f3bf89aa97405989c802ba270f815, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
+  syncMode: 1
   syncInterval: 0.1
-  clientAuthority: 0
+  clientAuthority: 1
   animator: {fileID: 7247124344986998861}
 --- !u!1 &3694121308822690179
 GameObject:

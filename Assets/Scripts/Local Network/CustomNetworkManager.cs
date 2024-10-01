@@ -37,7 +37,6 @@ public class CustomNetworkManager : NetworkManager
         base.OnServerSceneChanged(sceneName);
         if (sceneName == LobbyController.Instance.GameScene)
         {
-            Debug.Log("FuckFuck!");
             GameObject tileManagerObjectInstance = Instantiate(tileManagerObject);
             // 这里可以进一步对tileManagerObjectInstance进行操作，如设置位置、父对象等
             TileManager tileManager = tileManagerObjectInstance.GetComponent<TileManager>();
