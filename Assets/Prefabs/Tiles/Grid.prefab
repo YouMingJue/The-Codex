@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6461692251622046994}
   - component: {fileID: 4980327028718177254}
   - component: {fileID: 703016473855547909}
+  - component: {fileID: 6791568904410051026}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -61,6 +62,23 @@ MonoBehaviour:
   playerStartPosition: {x: 0, y: 0}
   tilemap: {fileID: 8523018501235180187}
   tiles: []
+--- !u!114 &6791568904410051026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151384543189406730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  visible: 0
+  m_AssetId: 
+  hasSpawned: 0
 --- !u!1 &3726123505916882237
 GameObject:
   m_ObjectHideFlags: 0

@@ -70,10 +70,7 @@ public class TileBehavior : NetworkBehaviour
             if (restoreCD < 0)
             {
                 restoreCD = 3;
-                if (isServer)
-                {
                     CmdRestoreElement();
-                }
             }
         }
         if (neighboringTiles != null)
