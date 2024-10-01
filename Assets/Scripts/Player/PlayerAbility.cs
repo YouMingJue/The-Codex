@@ -34,6 +34,8 @@ public class PlayerAbility : NetworkBehaviour
 
     private PlayerObjectController playerObjectController;
 
+    private NetworkAnimator networkAnimator;
+
     public float Mana
     {
         get { return mana; }
@@ -102,6 +104,8 @@ public class PlayerAbility : NetworkBehaviour
 
         playerObjectController = GetComponent<PlayerObjectController>();
         health.OnDeath += ResetPlayer;
+
+        networkAnimator = GetComponent<NetworkAnimator>();
     }
 
     // Update是每一帧调用一次
@@ -135,14 +139,14 @@ public class PlayerAbility : NetworkBehaviour
             if (Input.GetMouseButtonDown(0) && !IsMouseOverUI() && !isAttacking)
             {
                 isAttacking = true;
-                animator.SetTrigger("LightAttack");
+                networkAnimator.SetTrigger("LightAttack");
             }
 
             // 检查E键（重攻击）
             if (Input.GetKeyDown(KeyCode.E) && mana > manaCostAmount && !IsMouseOverUI() && !isAttacking)
             {
                 isAttacking = true;
-                animator.SetTrigger("HeavyAttack");
+                networkAnimator.SetTrigger("HeavyAttack");
             }
         }
     }
