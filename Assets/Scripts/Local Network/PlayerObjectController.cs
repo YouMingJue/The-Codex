@@ -62,7 +62,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     public void ChangeReady()
     {
-        if (hasAuthority)
+        if (isOwned)
         {
             CmdSetPlayerReady();
         }
@@ -114,7 +114,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     public void CanStartGame(string SceneName)
     {
-        if (hasAuthority)
+        if (isOwned)
         {
             CmdCanStartGame(SceneName);
         }

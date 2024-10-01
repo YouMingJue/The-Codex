@@ -13,7 +13,7 @@ public class CustomNetworkManager : NetworkManager
     [SerializeField] private GameObject tileManagerObject;
 
 
-    public override void OnServerAddPlayer(NetworkConnection conn)
+    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         if(SceneManager.GetActiveScene().name == "Lobby")
         {

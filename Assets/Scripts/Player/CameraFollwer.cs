@@ -12,7 +12,7 @@ public class CameraFollower : MonoBehaviour
     PlayerObjectController[] players = FindObjectsOfType<PlayerObjectController>();
     foreach (PlayerObjectController player in players)
     {
-        if (player.hasAuthority)
+        if (player.isOwned)
         {
             target = player.transform;
             break;

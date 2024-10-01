@@ -47,7 +47,7 @@ public class PlayerController : NetworkBehaviour
 
     private void Update()
     {
-        if (playerObjectController.hasAuthority)
+        if (playerObjectController.isOwned)
             Movement();
     }
 

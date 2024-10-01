@@ -38,7 +38,7 @@ public class PlayerMovementController : NetworkBehaviour
                 PlayerModel.SetActive(true);
             }
 
-            if (hasAuthority && currentState != BuffState.WaterState)
+            if (isOwned && currentState != BuffState.WaterState)
             {
                transform.position += Movement();
             }else if(currentState == BuffState.WaterState)

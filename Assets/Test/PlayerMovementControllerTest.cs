@@ -47,7 +47,7 @@ public class PlayerMovementControllerTest : MonoBehaviour
             // Check for water tiles around the player in each frame
             CheckForWaterTiles();
 
-if (playerObjectController.hasAuthority)
+if (playerObjectController.isOwned)
 {
             // Handle normal movement when not in WaterState
             if (currentState != BuffState.WaterState)

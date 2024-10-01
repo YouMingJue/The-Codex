@@ -56,7 +56,7 @@ public class PlayerAbility : NetworkBehaviour
     // 新增方法用于发送转换Tile的命令
     public void SendCmdConvertTile(Element convertType)
     {
-        if (playerObjectController.hasAuthority)
+        if (playerObjectController.isOwned)
         {
             // 这里假设通过当前玩家位置获取Tile，可能需要根据实际情况调整
             Vector3Int currentTilePos = TileManager.instance.tilemap.WorldToCell(transform.position);
@@ -111,7 +111,7 @@ public class PlayerAbility : NetworkBehaviour
     // Update是每一帧调用一次
     void Update()
     {
-        if (playerObjectController.hasAuthority)
+        if (playerObjectController.isOwned)
         {
             switch (element)
             {
