@@ -69,14 +69,14 @@ public class TileManager : MonoBehaviour
                     {
                         Vector3Int position = new Vector3Int(x, y, 0);
                         GameObject go = tilemap.GetInstantiatedObject(position);
-                        if (go != null)
+                        /*if (go != null)
                         {
                             // 如果游戏对象没有NetworkIdentity组件，添加一个
                             if (!go.GetComponent<NetworkIdentity>())
                             {
                                 go.AddComponent<NetworkIdentity>();
                             }
-                        }
+                        }*/
                     }
                 }
                 if (NetworkServer.active)
