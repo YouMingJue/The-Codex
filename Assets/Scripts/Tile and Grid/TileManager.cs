@@ -22,7 +22,6 @@ public class TileManager : MonoBehaviour
         }
         else
         {
-            // If another instance exists, destroy this one
             Destroy(gameObject);
         }
     }
@@ -57,7 +56,7 @@ public class TileManager : MonoBehaviour
     {
         if (!isTileInitialized)
         {
-            // Ö±ï¿½Ó»ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½Tilemapï¿½ï¿½ï¿½
+            // Ö±½Ó»ñÈ¡×ÔÉí¹ÒÔØµÄTilemap×é¼þ
             Tilemap tilemap = GetComponent<Tilemap>();
             if (tilemap != null)
             {
@@ -67,8 +66,8 @@ public class TileManager : MonoBehaviour
                 }
                 if (NetworkServer.active)
                 {
-                    // ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ø¶ï¿½ï¿½ï¿½È¨ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è½«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÈ¨ï¿½Þ¸ï¿½ï¿½ï¿½
+                    // Èç¹ûÐèÒªÌØ¶¨µÄÈ¨ÏÞÉèÖÃ£¬¿ÉÒÔ¸ù¾ÝÊµ¼ÊÇé¿öµ÷Õû
+                    // ÕâÀï¼ÙÉè½«·þÎñÆ÷Á¬½Ó×÷ÎªÈ¨ÏÞ¸³Óè
                     NetworkIdentity[] identities = GetComponentsInChildren<NetworkIdentity>();
                     foreach (NetworkIdentity identity in identities)
                     {
@@ -77,7 +76,7 @@ public class TileManager : MonoBehaviour
                 }
                 else
                 {
-                    // ï¿½ï¿½ï¿½ï¿½Ç¿Í»ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Æ³ï¿½È¨ï¿½Þ£ï¿½ï¿½ï¿½ï¿½Ö®Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½
+                    // Èç¹ûÊÇ¿Í»§¶Ë£¬¿ÉÄÜÐèÒªÒÆ³ýÈ¨ÏÞ£¨Èç¹ûÖ®Ç°ÓÐÉèÖÃ£©
                     NetworkIdentity[] identities = GetComponentsInChildren<NetworkIdentity>();
                     foreach (NetworkIdentity identity in identities)
                     {
@@ -86,20 +85,6 @@ public class TileManager : MonoBehaviour
                 }
             }
             isTileInitialized = true;
-        }
-    }
-
-    public void Init()
-    {
-        // Check if the instance already exists and enforce singleton pattern
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            // If another instance exists, destroy this one
-            Destroy(gameObject);
         }
     }
 }
