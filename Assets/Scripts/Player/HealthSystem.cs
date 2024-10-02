@@ -39,7 +39,7 @@ public class HealthSystem : NetworkBehaviour
     {
         OnDeath?.Invoke();
 
-        GameplayManager.AddScoreToOppositeTeam(playerObjectController.playerTeam);
+        GameplayManager.Instance.AddScoreToOppositeTeam(playerObjectController.playerTeam);
     }
 
     [Command]
