@@ -149,21 +149,15 @@ public class TileBehavior : NetworkBehaviour
         return false;
     }
 
-    public PlayerAbility relatedPlayer;
     public void PaintTile(Element paintType)
     {
         if (!IsOvercoming(paintType))
         {
-            CmdConvertTile(paintType);
-            //PlayerAbility playerAbility = FindObjectOfType<PlayerAbility>();
-            //if (playerAbility != null)
-            //{
-            //    playerAbility.PlayerConvertTile(paintType);
-            //}
+            CmdRequestTileConversion(paintType);
         }
     }
 
-    [Server]
+    [Command]
     private void CmdRequestTileConversion(Element paintType)
     {
         CmdConvertTile(paintType);
