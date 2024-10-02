@@ -104,7 +104,7 @@ public class TileBehavior : NetworkBehaviour
         {
             //GenerateFireEffect();
         }
-        RpcUpdateTileOnClients();
+        _tile.RefreshTile(position, TileManager.instance.tilemap);
     }
 
     [Command]
