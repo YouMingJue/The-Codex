@@ -35,7 +35,7 @@ public class HealthSystem : NetworkBehaviour
         playerObjectController = GetComponent<PlayerObjectController>();
     }
 
-    public void OnDeath()
+    public void Death()
     {
         OnDeath?.Invoke();
     }
