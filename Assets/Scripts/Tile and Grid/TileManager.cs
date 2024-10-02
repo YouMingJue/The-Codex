@@ -60,10 +60,6 @@ public class TileManager : MonoBehaviour
             Tilemap tilemap = GetComponent<Tilemap>();
             if (tilemap != null)
             {
-                foreach (TileBehavior tileBehavior in tiles)
-                {
-                    NetworkServer.Spawn(tileBehavior.gameObject);
-                }
                 if (NetworkServer.active)
                 {
                     // 如果需要特定的权限设置，可以根据实际情况调整

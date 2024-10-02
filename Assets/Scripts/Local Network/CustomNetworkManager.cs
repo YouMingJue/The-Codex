@@ -45,6 +45,10 @@ public class CustomNetworkManager : NetworkManager
             if (tileManager != null)
             {
                 tileManager.InitializeTilesForNetwork(tileManager.tiles);
+                foreach (TileBehavior tileBehavior in tileManager.tiles)
+                {
+                    NetworkServer.Spawn(tileBehavior.gameObject);
+                }
             }
         }
     }
