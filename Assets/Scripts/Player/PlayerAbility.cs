@@ -11,6 +11,7 @@ using UnityEngine.Tilemaps;
 //using UnityEngine.WSA;
 using UnityEngine.SceneManagement;
 using Mirror;
+using UnityEditor.Experimental.GraphView;
 
 public enum Buff
 {
@@ -215,7 +216,20 @@ public class PlayerAbility : NetworkBehaviour
 
         if (target.transform != transform)
         {
-            target.TakeDamage(damage, transform);
+            Debug.Log("I am getting hit");
+            // 显式地将浮点数转换为整数
+            int damageInt = (int)Mathf.Floor(damage);
+            target.currentHealth -= damageInt;
+
+            if (target.healthSlider != null)
+            {
+                target.healthSlider.value = (float)target.currentHealth;
+            }
+
+            if (target.currentHealth <= 0)
+            {
+                target.currentHealth = 0;
+            }
         }
     }
 
