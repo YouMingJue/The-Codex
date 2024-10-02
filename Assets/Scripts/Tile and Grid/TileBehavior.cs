@@ -149,6 +149,7 @@ public class TileBehavior : NetworkBehaviour
         return false;
     }
 
+    public PlayerAbility relatedPlayer;
     public void PaintTile(Element paintType)
     {
         if (!IsOvercoming(paintType))
