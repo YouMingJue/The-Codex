@@ -26,6 +26,14 @@ public class ElementalTile : Tile
 
     public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
     {
+        if (TileManager.instance == null)
+        {
+            Debug.LogError("Tilemap is null in StartUp");
+        }
+        if (go == null)
+        {
+            Debug.LogError("GameObject is null in StartUp");
+        }
         if (go != null)
         {
             TileBehavior tileObject = go.GetComponent<TileBehavior>();

@@ -35,7 +35,15 @@ public class TileBehavior : NetworkBehaviour
     [Server]
     public void CmdInit(ElementalTile tile, Vector3Int cellPos)
     {
-        Debug.Log("WOWOWOW");
+        if (tile == null)
+        {
+            Debug.LogError("ElementalTile is null in CmdInit");
+        }
+        if (cellPos == null)
+        {
+            Debug.LogError("Vector3Int position is null in CmdInit");
+        }
+
         _tile = tile;
         position = cellPos;
         RpcInitOnClients(tile, cellPos);
