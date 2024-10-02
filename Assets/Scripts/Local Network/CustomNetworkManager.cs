@@ -37,9 +37,10 @@ public class CustomNetworkManager : NetworkManager
         base.OnServerSceneChanged(sceneName);
         if (sceneName == LobbyController.Instance.GameScene && tileManagerObject != null)
         {
+            Debug.Log("Server active: " + NetworkServer.active);
             GameObject tileManagerObjectInstance = Instantiate(tileManagerObject);
             NetworkServer.Spawn(tileManagerObjectInstance);
-            // ������Խ�һ����tileManagerObjectInstance���в�����������λ�á��������
+            // 给新生成的tileManagerObjectInstance赋值tileManager
             TileManager tileManager = tileManagerObjectInstance.GetComponent<TileManager>();
             if (tileManager != null)
             {
