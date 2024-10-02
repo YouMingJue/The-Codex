@@ -35,6 +35,11 @@ public class HealthSystem : NetworkBehaviour
         playerObjectController = GetComponent<PlayerObjectController>();
     }
 
+    public void OnDeath()
+    {
+        OnDeath?.Invoke();
+    }
+
     [Command]
     // Method to handle when the player takes damage
     public void TakeDamage(float damage, Transform attacker)

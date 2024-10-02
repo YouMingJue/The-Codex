@@ -229,6 +229,7 @@ public class PlayerAbility : NetworkBehaviour
             if (target.currentHealth <= 0)
             {
                 target.currentHealth = 0;
+                target.OnDeath();
             }
         }
     }
