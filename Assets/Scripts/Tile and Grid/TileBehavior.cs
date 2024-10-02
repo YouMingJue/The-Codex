@@ -107,7 +107,7 @@ public class TileBehavior : NetworkBehaviour
         RpcUpdateTileOnClients();
     }
 
-    [ClientRpc]
+    [Command]
     public void RpcUpdateTileOnClients()
     {
         _tile.RefreshTile(position, TileManager.instance.tilemap);

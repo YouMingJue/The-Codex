@@ -92,7 +92,7 @@ public class PlayerAbility : NetworkBehaviour
                 // �������GenerateFireEffect��Tile�ϵķ����������Ҫ����ҽű��������߼���Ҫ����
                 // currentTile.GenerateFireEffect();
             }
-            currentTile.RpcUpdateTileOnClients();
+            currentTile._tile.RefreshTile(currentTile.position, TileManager.instance.tilemap);
         }
     }
 
