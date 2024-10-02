@@ -89,7 +89,16 @@ namespace Mirror.FizzySteam
                 {
                     if (cancelToken.IsCancellationRequested)
                     {
-                        GameObject errorObject = GameObject.Find("Error Message");
+                        GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+                        GameObject errorObject = null;
+                        foreach (GameObject obj in allObjects)
+                        {
+                            if (obj.name == "Error Message")
+                            {
+                                errorObject = obj;
+                                break;
+                            }
+                        }
 
                         if (errorObject != null)
                         {
@@ -97,7 +106,7 @@ namespace Mirror.FizzySteam
                         }
                         else
                         {
-                            Debug.LogError("未找到名为 'Error Message' 的游戏对象");
+                            Debug.LogError("No Error mEssage GO");
                         }
                         Debug.LogError($"The connection attempt was cancelled.");
                     }
