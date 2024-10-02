@@ -38,6 +38,8 @@ public class HealthSystem : NetworkBehaviour
     public void Death()
     {
         OnDeath?.Invoke();
+
+        GameplayManager.AddScoreToOppositeTeam(playerObjectController.playerTeam);
     }
 
     [Command]

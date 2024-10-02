@@ -12,6 +12,7 @@ public class TileBehavior : NetworkBehaviour
     public Element element;
     [SyncVar]
     public Element originalElement;
+    [SyncVar]
     public ElementalTile _tile;
 
     [HideInInspector]
