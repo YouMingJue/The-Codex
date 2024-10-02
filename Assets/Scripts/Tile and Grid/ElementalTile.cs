@@ -38,7 +38,7 @@ public class ElementalTile : Tile
         {
             TileBehavior tileObject = go.GetComponent<TileBehavior>();
             tileObject.Init(this, position);
-            TileManager.instance.tiles.Add(tileObject);
+            TileManager.instance?.tiles.Add(tileObject);
 
             //if (!go.GetComponent<NetworkIdentity>())
             //{

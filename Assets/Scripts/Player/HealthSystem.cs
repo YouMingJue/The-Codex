@@ -35,10 +35,11 @@ public class HealthSystem : NetworkBehaviour
         playerObjectController = GetComponent<PlayerObjectController>();
     }
 
-    // Method to handle when the player takes damage
     [Command]
+    // Method to handle when the player takes damage
     public void TakeDamage(float damage, Transform attacker)
     {
+        Debug.Log("I am getting hit");
         if (isImmune) return;
         // 显式地将浮点数转换为整数
         int damageInt = (int)Mathf.Floor(damage);

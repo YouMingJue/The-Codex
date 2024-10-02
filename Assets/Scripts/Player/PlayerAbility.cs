@@ -162,8 +162,11 @@ public class PlayerAbility : NetworkBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            if (!collider.gameObject.GetComponent<NetworkIdentity>())
-                Attack(collider.gameObject.GetComponent<NetworkIdentity>(), 20);
+            if (collider.gameObject.TryGetComponent(out HealthSystem entity) && collider.gameObject.GetComponent<NetworkIdentity>()) 
+            {
+                Debug.Log("I did attack");
+                Attack(entity, 20);
+            }
         }
     }
 
@@ -184,7 +187,8 @@ public class PlayerAbility : NetworkBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            Attack(collider.gameObject.GetComponent<NetworkIdentity>(), 30);
+            if(collider.gameObject.TryGetComponent(out HealthSystem entity) && collider.gameObject.GetComponent<NetworkIdentity>()) 
+                Attack(entity, 30);
             TileBehavior tile = collider.GetComponent<TileBehavior>();
             if (tile != null)
             {
@@ -201,7 +205,7 @@ public class PlayerAbility : NetworkBehaviour
     }
 
     [Command]
-    public void Attack(NetworkIdentity target, int damage)
+    public void Attack(HealthSystem target, int damage)
     {
         if (target == null)
         {
@@ -209,23 +213,9 @@ public class PlayerAbility : NetworkBehaviour
             return;
         }
 
-        Collider2D collider = target.GetComponent<Collider2D>();
-        if (collider == null)
+        if (target.transform != transform)
         {
-            Debug.LogError("Attack command: Collider2D component not found on target");
-            return;
-        }
-
-        if (collider.transform != transform)
-        {
-            HealthSystem entity = collider.GetComponent<HealthSystem>();
-            if (entity == null)
-            {
-                Debug.LogError("Attack command: HealthSystem component not found on target");
-                return;
-            }
-
-            entity.TakeDamage(damage, transform);
+            target.TakeDamage(damage, transform);
         }
     }
 
