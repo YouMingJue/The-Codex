@@ -36,20 +36,6 @@ public class TileBehavior : NetworkBehaviour
             CmdInit(tile, cellPos);
     }
 
-    private void Start()
-    {
-        if (isServer)
-        {
-            TileManager.instance.tiles.Add(this);
-            neighboringTiles = TileManager.instance.GetSurroundingTiles(position);
-            // ���������Ҫ�ڷ���������ʱ��ʼ���ض�tile�����Ե���Init��������ֱ��ʹ��CmdInit
-            // ����������һ��Ĭ�ϵĳ�ʼ������
-            ElementalTile defaultTile = null; // ������Ҫ����ʵ�������ֵ
-            Vector3Int defaultPos = new Vector3Int(0, 0, 0); // ������Ҫ����ʵ�������ֵ
-            Init(defaultTile, defaultPos);
-        }
-    }
-
 
     [Server]
     public void CmdInit(ElementalTile tile, Vector3Int cellPos)
