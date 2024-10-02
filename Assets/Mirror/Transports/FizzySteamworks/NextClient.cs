@@ -89,6 +89,16 @@ namespace Mirror.FizzySteam
                 {
                     if (cancelToken.IsCancellationRequested)
                     {
+                        GameObject errorObject = GameObject.Find("Error Message");
+
+                        if (errorObject != null)
+                        {
+                            errorObject.SetActive(true);
+                        }
+                        else
+                        {
+                            Debug.LogError("未找到名为 'Error Message' 的游戏对象");
+                        }
                         Debug.LogError($"The connection attempt was cancelled.");
                     }
                     else if (timeOutTask.IsCompleted)

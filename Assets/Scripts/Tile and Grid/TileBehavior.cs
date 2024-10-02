@@ -26,11 +26,6 @@ public class TileBehavior : NetworkBehaviour
 
     private List<TileBehavior> neighboringTiles;
 
-    private void Awake()
-    {
-        NetworkServer.Spawn(gameObject);
-    }
-
     public void Init(ElementalTile tile, Vector3Int cellPos)
     {
             CmdInit(tile, cellPos);
