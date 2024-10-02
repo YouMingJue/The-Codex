@@ -53,7 +53,7 @@ public class TileManager : MonoBehaviour
     }
 
     private bool isTileInitialized = false;
-    public void InitializeTilesForNetwork()
+    public void InitializeTilesForNetwork(List<TileBehavior> tiles)
     {
         if (!isTileInitialized)
         {
@@ -61,23 +61,9 @@ public class TileManager : MonoBehaviour
             Tilemap tilemap = GetComponent<Tilemap>();
             if (tilemap != null)
             {
-                // 遍历Tilemap中的每个位置并处理Tile
-                BoundsInt bounds = tilemap.cellBounds;
-                for (int x = bounds.min.x; x < bounds.max.x; x++)
+                foreach (TileBehavior tileBehavior in tiles)
                 {
-                    for (int y = bounds.min.y; y < bounds.max.y; y++)
-                    {
-                        Vector3Int position = new Vector3Int(x, y, 0);
-                        GameObject go = tilemap.GetInstantiatedObject(position);
-                        /*if (go != null)
-                        {
-                            // 如果游戏对象没有NetworkIdentity组件，添加一个
-                            if (!go.GetComponent<NetworkIdentity>())
-                            {
-                                go.AddComponent<NetworkIdentity>();
-                            }
-                        }*/
-                    }
+                    NetworkServer.Spawn(tileBehavior.gameObject);
                 }
                 if (NetworkServer.active)
                 {
