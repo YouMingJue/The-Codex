@@ -44,7 +44,6 @@ public class CustomNetworkManager : NetworkManager
             TileManager tileManager = tileManagerObjectInstance.GetComponent<TileManager>();
             if (tileManager != null)
             {
-                tileManager.Init();
                 tileManager.InitializeTilesForNetwork(tileManager.tiles);
             }
         }
