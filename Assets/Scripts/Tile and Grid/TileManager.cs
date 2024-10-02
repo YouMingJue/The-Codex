@@ -20,11 +20,6 @@ public class TileManager : MonoBehaviour
         {
             instance = this;
         }
-        else
-        {
-            // If another instance exists, destroy this one
-            Destroy(gameObject);
-        }
     }
 
     public Vector3 GetPlayerStartPosition()
@@ -86,6 +81,20 @@ public class TileManager : MonoBehaviour
                 }
             }
             isTileInitialized = true;
+        }
+    }
+
+    public void Init()
+    {
+        // Check if the instance already exists and enforce singleton pattern
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            // If another instance exists, destroy this one
+            Destroy(gameObject);
         }
     }
 }
