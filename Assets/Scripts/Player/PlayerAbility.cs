@@ -203,15 +203,29 @@ public class PlayerAbility : NetworkBehaviour
     [Command]
     public void Attack(NetworkIdentity target, int damage)
     {
-        Collider2D collider = target.GetComponent<Collider2D>();
-        if (collider != null && collider.transform != transform)
+        if (target == null)
         {
-            // 确保目标对象有 HealthSystem 组件
+            Debug.LogError("Attack command: target is null");
+            return;
+        }
+
+        Collider2D collider = target.GetComponent<Collider2D>();
+        if (collider == null)
+        {
+            Debug.LogError("Attack command: Collider2D component not found on target");
+            return;
+        }
+
+        if (collider.transform != transform)
+        {
             HealthSystem entity = collider.GetComponent<HealthSystem>();
-            if (entity != null)
+            if (entity == null)
             {
-                entity.TakeDamage(damage, transform);
+                Debug.LogError("Attack command: HealthSystem component not found on target");
+                return;
             }
+
+            entity.TakeDamage(damage, transform);
         }
     }
 
